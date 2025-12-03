@@ -149,9 +149,34 @@
   color: #333;
   margin-bottom: 1rem;
 }
-.processing-notice p {
+
+@keyframes tipFadeInOut {
+  0% { opacity: 0; transform: translateY(-10px); }
+  10% { opacity: 1; transform: translateY(0); }
+  90% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(10px); }
+}
+
+.tip-message {
+  margin-top: 2rem;
+  padding: 1rem 1.5rem;
+  background-color: #e9ecef;
+  border-left: 5px solid #007bff;
+  border-radius: 4px;
+  color: #495057;
+  font-style: italic;
   font-size: 1rem;
-  color: #666;
+  line-height: 1.6;
+  text-align: left;
+  animation: tipFadeInOut 12s ease-in-out infinite; /* Apply animation */
+}
+.tip-message:before {
+  content: '💡 Marketer Tip!';
+  font-weight: bold;
+  display: block;
+  margin-bottom: 0.5rem;
+  font-style: normal;
+  color: #343a40;
 }
 
 
@@ -226,40 +251,6 @@
   max-height: 250px; /* Set max height for scroll */
   overflow-y: auto; /* Enable vertical scroll */
   padding-right: 10px; /* Space for scrollbar */
-}
-
-.validator-report {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px dashed #ccc;
-  font-size: 0.9rem;
-}
-
-.report-title {
-  font-weight: bold;
-  font-size: 1rem;
-  color: #555;
-  margin-bottom: 0.75rem;
-}
-
-.report-item {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-  color: #666;
-}
-
-.report-item strong {
-  color: #444;
-}
-
-.report-item .value {
-  font-weight: bold;
-  color: #d9534f;
-}
-
-.report-item .value.safe {
-  color: #28a745;
 }
 
 .select-button {
@@ -354,4 +345,55 @@
 
 .save-selection-button:hover {
   opacity: 0.9;
+}
+
+/* Styles for Classification Reason */
+.classification-reason-container {
+  margin-top: 1rem;
+}
+
+.reason-toggle-button {
+  background: none;
+  border: 1px solid #007bff;
+  color: #007bff;
+  padding: 0.4rem 0.8rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.reason-toggle-button:hover {
+  background: #e7f3ff;
+}
+
+.classification-reason-text {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 5px;
+  color: #495057;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* Loading Dots Animation */
+@keyframes blink {
+  0% { opacity: 0.2; }
+  20% { opacity: 1; }
+  100% { opacity: 0.2; }
+}
+
+.loading-dots span {
+  animation: blink 1.4s infinite both;
+}
+
+.loading-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.loading-dots span:nth-child(3) {
+  animation-delay: 0.4s;
 }

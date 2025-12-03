@@ -2,35 +2,36 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './KnowledgeModal.css'; // 모달 스타일 재활용
 
-interface Knowledge {
-  knowledge_id: string;
-  title: string;
-  content_text: string;
-  source_type: '정책' | '약관' | '성공_사례';
-  upload_date: string;
-  is_active: boolean;
-  related_campaign_id?: string;
+interface KnowledgeDetail {
+  document: string;
+  id: string;
+  metadata: {
+    title: string;
+    registration_date: string;
+    source_type: '정책' | '약관' | '성공_사례' | '실패_사례';
+    campaign_id?: string;
+  };
 }
 
 interface KnowledgeEditModalProps {
   isOpen: boolean;
   onClose: () => void;
   onKnowledgeUpdated: () => void; // 지식 수정 후 목록 새로고침을 위한 콜백
-  knowledgeItem: Knowledge | null; // 수정할 지식 데이터
+  knowledgeItem: KnowledgeDetail | null; // 수정할 지식 데이터 타입 수정
 }
 
 const KnowledgeEditModal: React.FC<KnowledgeEditModalProps> = ({ isOpen, onClose, onKnowledgeUpdated, knowledgeItem }) => {
   const [title, setTitle] = useState('');
   const [contentText, setContentText] = useState('');
-  const [sourceType, setSourceType] = useState<'정책' | '약관' | '성공_사례'>('정책');
+  const [sourceType, setSourceType] = useState<'정책' | '약관' | '성공_사례' | '실패_사례'>('정책');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen && knowledgeItem) {
-      setTitle(knowledgeItem.title);
-      setContentText(knowledgeItem.content_text);
-      setSourceType(knowledgeItem.source_type);
+      setTitle(knowledgeItem.metadata.title);
+      setContentText(knowledgeItem.document);
+      setSourceType(knowledgeItem.metadata.source_type);
       setError(null);
     } else if (!isOpen) {
       // 모달이 닫힐 때 상태 초기화
@@ -53,8 +54,9 @@ const KnowledgeEditModal: React.FC<KnowledgeEditModalProps> = ({ isOpen, onClose
     }
 
     try {
-      await axios.put(`/api/knowledge/${knowledgeItem.knowledge_id}`, {
-        campaign_summary: `${title} 요약: ${contentText.substring(0, 50)}...`, // title과 content_text를 조합하여 campaign_summary 생성
+      await axios.put(`/api/knowledge/${knowledgeItem.id}`, {
+        // [FIX] Send the full content to both fields to handle backend inconsistency
+        campaign_summary: contentText,
         campaign_details: {
           content_text: contentText,
           source_type: sourceType,
@@ -78,7 +80,7 @@ const KnowledgeEditModal: React.FC<KnowledgeEditModalProps> = ({ isOpen, onClose
     <div className="modal-overlay">
       <div className="modal-content">
         <h2>지식 수정</h2>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="knowledge-form">
           <div className="form-group">
             <label htmlFor="title">제목</label>
             <input
@@ -89,7 +91,7 @@ const KnowledgeEditModal: React.FC<KnowledgeEditModalProps> = ({ isOpen, onClose
               required
             />
           </div>
-          <div className="form-group">
+          <div className="form-group textarea-group">
             <label htmlFor="contentText">내용</label>
             <textarea
               id="contentText"
@@ -103,11 +105,12 @@ const KnowledgeEditModal: React.FC<KnowledgeEditModalProps> = ({ isOpen, onClose
             <select
               id="sourceType"
               value={sourceType}
-              onChange={(e) => setSourceType(e.target.value as '정책' | '약관' | '성공_사례')}
+              onChange={(e) => setSourceType(e.target.value as '정책' | '약관' | '성공_사례' | '실패_사례')}
             >
               <option value="정책">정책</option>
               <option value="약관">약관</option>
               <option value="성공_사례">성공 사례</option>
+              <option value="실패_사례">실패 사례</option>
             </select>
           </div>
           {error && <p className="error-message">{error}</p>}

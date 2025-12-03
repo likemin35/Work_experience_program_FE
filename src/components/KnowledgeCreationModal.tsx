@@ -11,7 +11,7 @@ interface KnowledgeCreationModalProps {
 const KnowledgeCreationModal: React.FC<KnowledgeCreationModalProps> = ({ isOpen, onClose, onKnowledgeCreated }) => {
   const [title, setTitle] = useState('');
   const [contentText, setContentText] = useState('');
-  const [sourceType, setSourceType] = useState<'정책' | '약관' | '성공_사례'>('정책');
+  const [sourceType, setSourceType] = useState<'정책' | '약관' | '성공_사례' | '실패_사례'>('정책');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,7 +32,8 @@ const KnowledgeCreationModal: React.FC<KnowledgeCreationModalProps> = ({ isOpen,
 
     try {
       await axios.post('/api/knowledge', {
-        campaign_summary: `${title} 요약: ${contentText.substring(0, 50)}...`, // title과 content_text를 조합하여 campaign_summary 생성
+        // [FIX] Send the full content to both fields to handle backend inconsistency
+        campaign_summary: contentText,
         campaign_details: {
           content_text: contentText,
           source_type: sourceType,
@@ -81,11 +82,12 @@ const KnowledgeCreationModal: React.FC<KnowledgeCreationModalProps> = ({ isOpen,
             <select
               id="sourceType"
               value={sourceType}
-              onChange={(e) => setSourceType(e.target.value as '정책' | '약관' | '성공_사례')}
+              onChange={(e) => setSourceType(e.target.value as '정책' | '약관' | '성공_사례' | '실패_사례')}
             >
               <option value="정책">정책</option>
               <option value="약관">약관</option>
               <option value="성공_사례">성공 사례</option>
+              <option value="실패_사례">실패 사례</option>
             </select>
           </div>
           {error && <p className="error-message">{error}</p>}

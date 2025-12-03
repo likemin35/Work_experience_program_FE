@@ -4,8 +4,22 @@ import axios from 'axios';
 import './CampaignDetailPage.css';
 import PerformanceModal from '../components/PerformanceModal'; // Import the modal
 import RefineRequestModal from '../components/RefineRequestModal'; // Import the RefineRequestModal
+import AiValidatorReport from '../components/AiValidatorReport';
 
-// --- Type Definitions based on API Spec ---
+const marketingTips = [
+  "메시지에 고객의 이름을 넣어 개인화를 시도해보세요. '[이름]님'이 '고객님'보다 훨씬 높은 반응을 이끌어낼 수 있습니다.",
+  "긴급성을 부여하는 문구를 사용해보세요. '기간 한정', '오늘만 이 가격'과 같은 표현은 클릭률을 높이는 데 효과적입니다.",
+  "숫자를 활용하여 구체적인 혜택을 강조하세요. '큰 할인'보다는 '전 품목 20% 할인'이 더 명확하고 설득력 있습니다.",
+  "고객에게 질문을 던지는 메시지는 참여를 유도하고 생각할 거리를 제공합니다. '새로운 시즌, 어떤 스타일을 찾고 계신가요?'",
+  "메시지 전송 시간도 중요한 요소입니다. 타겟 고객이 가장 활발하게 활동하는 시간대를 고려하여 발송해보세요.",
+  "A/B 테스트는 선택이 아닌 필수입니다. 두 가지 다른 메시지 시안 중 어떤 것이 더 나은 성과를 보이는지 항상 확인하세요.",
+  "이모티콘(😊)이나 특수문자(★)를 적절히 사용하면 메시지에 생동감을 더하고 주목도를 높일 수 있습니다.",
+  "CTA(Call To Action) 버튼의 문구를 명확하게 작성하세요. '더 알아보기'나 '지금 혜택 받기'처럼 고객이 무엇을 해야 할지 정확히 알려주세요.",
+  "고객의 과거 구매 데이터를 활용하면 더욱 개인화된 메시지를 만들 수 있습니다. '[관심 카테고리] 신상품을 확인해보세요!'",
+  "메시지와 함께 매력적인 이미지를 사용하는 것은 고객의 시선을 사로잡는 가장 확실한 방법 중 하나입니다."
+];
+
+// --- Type Definitions based on API Spec (Reverted to original flat structure) ---
 interface ValidatorReportFromAPI {
   spam_risk_score: number;
   policy_compliance: 'PASS' | 'FAIL';
@@ -18,6 +32,7 @@ interface MessageResultFromAPI {
   targetGroupIndex: number;
   targetName: string;
   targetFeatures: string | null;
+  classificationReason: string | null; // <-- Add new field
   messageDraftIndex: number;
   messageText: string;
   validatorReport: ValidatorReportFromAPI | null;
@@ -35,7 +50,9 @@ interface CampaignDetailFromAPI {
   status: string;
   actualCtr: number | null;
   conversionRate: number | null;
+  performanceNotes: string | null;
   updatedAt: string;
+  performanceStatus?: "SUCCESS" | "FAILURE" | "UNDECIDED"; // Use new enum field
   messageResults: MessageResultFromAPI[];
 }
 
@@ -59,6 +76,7 @@ interface TargetGroup {
   target_group_index: number;
   target_name: string;
   target_features: string;
+  classification_reason: string; // <-- Add new field
   message_results: MessageResult[];
 }
 
@@ -67,20 +85,24 @@ interface CampaignDetail { // This is what the component expects as its state
   purpose: string;
   actualCtr: number | null;
   conversionRate: number | null;
+  performanceNotes: string | null;
   status: string; // Add status here
+  performanceStatus?: "SUCCESS" | "FAILURE" | "UNDECIDED"; // Use new enum field
   target_groups: TargetGroup[];
 }
 
-// Function to transform API response to component's expected structure
+// Function to transform API response to component's expected structure (Reverted to original grouping logic)
 const transformApiResponse = (apiResponse: CampaignDetailFromAPI): CampaignDetail => {
   const targetGroupsMap = new Map<number, TargetGroup>();
 
-  apiResponse.messageResults.forEach(apiMessage => {
+  // Use optional chaining and default to empty array for safety
+  (apiResponse.messageResults || []).forEach(apiMessage => {
     if (!targetGroupsMap.has(apiMessage.targetGroupIndex)) {
       targetGroupsMap.set(apiMessage.targetGroupIndex, {
         target_group_index: apiMessage.targetGroupIndex,
         target_name: apiMessage.targetName,
-        target_features: apiMessage.targetFeatures || '',
+        target_features: apiMessage.targetFeatures || '특징 정보 없음',
+        classification_reason: apiMessage.classificationReason || '분류 근거 정보 없음', // <-- Populate new field
         message_results: [],
       });
     }
@@ -92,12 +114,12 @@ const transformApiResponse = (apiResponse: CampaignDetailFromAPI): CampaignDetai
         spam_risk_score: apiMessage.validatorReport.spam_risk_score,
         policy_compliance: apiMessage.validatorReport.policy_compliance,
         review_summary: apiMessage.validatorReport.review_summary,
-        recommended_action: apiMessage.validatorReport.recommended_action,
+        recommended_action: apiMessage.validatorReport.recommended_action, // Corrected field
       } : { // Default validator report if null
         spam_risk_score: 0,
         policy_compliance: 'PASS',
         review_summary: 'No report available',
-        recommended_action: 'None',
+        recommended_action: 'None', // Corrected field
       },
       message_text: apiMessage.messageText,
       is_selected: apiMessage.selected,
@@ -109,13 +131,16 @@ const transformApiResponse = (apiResponse: CampaignDetailFromAPI): CampaignDetai
     purpose: apiResponse.purpose,
     actualCtr: apiResponse.actualCtr,
     conversionRate: apiResponse.conversionRate,
-    status: apiResponse.status, // Map status
+    performanceNotes: apiResponse.performanceNotes,
+    status: apiResponse.status,
+    performanceStatus: apiResponse.performanceStatus, // Map new field
     target_groups: Array.from(targetGroupsMap.values()),
   };
 };
 
 const statusMap: { [key: string]: string } = {
   PROCESSING: '처리 중',
+
   REFINING: '수정 중',
   COMPLETED: '생성 완료',
   FAILED: '실패',
@@ -125,14 +150,17 @@ const statusMap: { [key: string]: string } = {
   RAG_REGISTERED: 'RAG DB 등록 완료',
 };
 
-const getRagButtonTooltip = (status: string): string => {
-  if (status === 'RAG_REGISTERED') {
+const getRagButtonTooltip = (campaign: CampaignDetail): string => {
+  if (campaign.status === 'RAG_REGISTERED') {
     return "이미 RAG DB에 등록된 캠페인입니다.";
   }
-  if (status === 'SUCCESS_CASE') {
+  if (campaign.performanceStatus === "UNDECIDED") {
+    return "미정 상태의 캠페인은 RAG DB에 등록할 수 없습니다.";
+  }
+  if (campaign.performanceStatus === "SUCCESS") {
     return "이 캠페인을 '성공 사례'로 RAG DB에 저장합니다.";
   }
-  if (status === 'PERFORMANCE_REGISTERED') {
+  if (campaign.performanceStatus === "FAILURE") {
     return "이 캠페인을 '실패 사례'로 RAG DB에 저장합니다.";
   }
   
@@ -178,6 +206,13 @@ const CampaignDetailPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [isPerformanceModalOpen, setIsPerformanceModalOpen] = useState(false);
   const [isRefineModalOpen, setIsRefineModalOpen] = useState(false);
+  const [loadingTip, setLoadingTip] = useState('');
+  const [expandedReasons, setExpandedReasons] = useState<Record<number, boolean>>({});
+  const [tipKey, setTipKey] = useState(0); // New state for dynamic tip transition
+
+  const toggleReason = (index: number) => {
+    setExpandedReasons(prev => ({ ...prev, [index]: !prev[index] }));
+  };
 
   const fetchCampaignDetail = async () => {
     try {
@@ -201,8 +236,26 @@ const CampaignDetailPage = () => {
     }
   }, [campaignId]);
 
-  const handleSelectMessage = (resultId: string) => {
-    setCampaign(prevCampaign => {
+  // Effect for rotating tips during processing
+  useEffect(() => {
+    if (campaign && ['PROCESSING', 'REFINING'].includes(campaign.status)) {
+            // Set an initial tip
+            setLoadingTip(marketingTips[Math.floor(Math.random() * marketingTips.length)]);
+            setTipKey(prevKey => prevKey + 1); // Increment tipKey to trigger re-render
+      
+            const intervalId = setInterval(() => {
+              const randomIndex = Math.floor(Math.random() * marketingTips.length);
+              setLoadingTip(marketingTips[randomIndex]);
+              setTipKey(prevKey => prevKey + 1); // Increment tipKey to trigger re-render
+            }, 12000); // Change tip every 12 seconds
+      
+            // Cleanup interval on component unmount or when status changes
+            return () => clearInterval(intervalId);
+          }
+        }, [campaign?.status]);
+      
+        const handleSelectMessage = (resultId: string) => {
+          setCampaign(prevCampaign => {
       if (!prevCampaign) return null;
 
       const newTargetGroups = prevCampaign.target_groups.map(group => ({
@@ -239,18 +292,17 @@ const CampaignDetailPage = () => {
     }
   };
 
-  const isButtonDisabled = (action: 'refine' | 'performance' | 'rag') => {
-    if (!campaign) return true;
-    const status = campaign.status;
-    if (status === 'RAG_REGISTERED') return true;
+  const isButtonDisabled = (action: 'refine' | 'performance' | 'rag', currentCampaign: CampaignDetail) => {
+    if (currentCampaign.status === 'RAG_REGISTERED') return true; // Already registered
 
     switch (action) {
       case 'refine':
-        return ['PROCESSING', 'REFINING', 'FAILED'].includes(status);
+        return ['PROCESSING', 'REFINING', 'FAILED'].includes(currentCampaign.status);
       case 'performance':
-        return ['PROCESSING', 'REFINING', 'FAILED', 'COMPLETED'].includes(status);
+        return ['PROCESSING', 'REFINING', 'FAILED', 'COMPLETED'].includes(currentCampaign.status);
       case 'rag':
-        return !['PERFORMANCE_REGISTERED', 'SUCCESS_CASE'].includes(status);
+        // RAG button disabled if performanceStatus is UNDECIDED, or if status is not PERFORMANCE_REGISTERED or SUCCESS_CASE
+        return currentCampaign.performanceStatus === "UNDECIDED" || !['PERFORMANCE_REGISTERED', 'SUCCESS_CASE'].includes(currentCampaign.status);
       default:
         return false;
     }
@@ -269,16 +321,29 @@ const CampaignDetailPage = () => {
     }
   };
 
-  const handlePerformanceSubmit = async (actualCtr: number, conversionRate: number, isSuccessCase: boolean) => {
+  const handlePerformanceSubmit = async (actualCtr: number, conversionRate: number, performanceStatus: "SUCCESS" | "FAILURE" | "UNDECIDED" | undefined, performanceNotes: string) => {
+    // Backend now expects performanceStatus directly, no conversion to isSuccessCase needed.
+
+    const payload: {
+      actualCtr: number;
+      conversionRate: number;
+      performanceStatus?: "SUCCESS" | "FAILURE" | "UNDECIDED"; // Make optional if UNDECIDED is not sent
+      performanceNotes: string;
+    } = {
+      actualCtr,
+      conversionRate,
+      performanceNotes,
+    };
+
+    if (performanceStatus !== undefined) {
+      payload.performanceStatus = performanceStatus;
+    }
+
     try {
-      await axios.put(`/api/campaigns/${campaignId}/performance`, {
-        actualCtr,
-        conversionRate,
-        isSuccessCase,
-      });
+      await axios.put(`/api/campaigns/${campaignId}/performance`, payload);
       alert('성과가 성공적으로 저장되었습니다.');
       setIsPerformanceModalOpen(false);
-      fetchCampaignDetail(); // Re-fetch data to show updated status
+      fetchCampaignDetail(); // Re-fetch data to show updated state
     } catch (err) {
       console.error('Error submitting performance:', err);
       alert('성과 저장에 실패했습니다.');
@@ -288,15 +353,20 @@ const CampaignDetailPage = () => {
   const handleRagTrigger = async () => {
     if (!campaign) return;
 
-    const confirmMessage = campaign.status === 'SUCCESS_CASE'
+    if (campaign.performanceStatus === "UNDECIDED") {
+      alert("미정 상태의 캠페인은 RAG DB에 등록할 수 없습니다.");
+      return;
+    }
+
+    const confirmMessage = campaign.performanceStatus === 'SUCCESS'
       ? '이 캠페인을 RAG DB에 성공 사례로 반영하시겠습니까?'
-      : '이 캠페인은 "성공" 사례가 아닙니다. 실패 사례로 RAG DB에 반영하시겠습니까?';
+      : '이 캠페인은 "실패" 사례입니다. RAG DB에 반영하시겠습니까?'; // Updated for FAILURE
 
     if (window.confirm(confirmMessage)) {
       try {
         await axios.post(`/api/campaigns/${campaignId}/rag-trigger`);
         alert('RAG DB에 성공적으로 반영되었습니다.');
-        fetchCampaignDetail(); // Re-fetch data to show updated status
+        fetchCampaignDetail(); // Re-fetch data to show updated state
       } catch (err) {
         console.error('Error triggering RAG:', err);
         alert('RAG DB 반영에 실패했습니다.');
@@ -316,17 +386,14 @@ const CampaignDetailPage = () => {
     return <div className="campaign-detail-container"><h2>캠페인 정보를 찾을 수 없습니다.</h2></div>;
   }
 
-  const getSuccessStatusInfo = (status: string): { text: string; className: string } => {
-    if (status === 'SUCCESS_CASE') {
+  const getSuccessStatusInfo = (campaign: CampaignDetail): { text: string; className: string } => {
+    if (campaign.performanceStatus === "SUCCESS") {
       return { text: '성공', className: 'status-SUCCESS_CASE' };
     }
-    if (status === 'FAILED') {
+    if (campaign.performanceStatus === "FAILURE") {
       return { text: '실패', className: 'status-FAILED' };
     }
-    if (status === 'PERFORMANCE_REGISTERED' || status === 'RAG_REGISTERED') {
-      return { text: '실패', className: 'status-FAILED' };
-    }
-    return { text: '미정', className: 'status-PROCESSING' };
+    return { text: '미정', className: 'status-PROCESSING' }; // Default for UNDECIDED or if not set
   };
 
   const hasSelectionChanged = () => {
@@ -336,7 +403,7 @@ const CampaignDetailPage = () => {
     return JSON.stringify(currentSelected) !== JSON.stringify(initialSelected);
   };
 
-  const successStatusInfo = getSuccessStatusInfo(campaign.status);
+  const successStatusInfo = getSuccessStatusInfo(campaign); // Pass campaign object
 
   return (
     <div className="campaign-detail-container">
@@ -373,7 +440,7 @@ const CampaignDetailPage = () => {
             <button 
               className="action-button refine-button"
               onClick={() => setIsRefineModalOpen(true)}
-              disabled={isButtonDisabled('refine')}
+              disabled={isButtonDisabled('refine', campaign)}
             >
               수정 요청
             </button>
@@ -383,7 +450,7 @@ const CampaignDetailPage = () => {
             <button 
               className="action-button performance-button"
               onClick={() => setIsPerformanceModalOpen(true)}
-              disabled={isButtonDisabled('performance')}
+              disabled={isButtonDisabled('performance', campaign)}
             >
               {getPerformanceButtonText(campaign.status)}
             </button>
@@ -393,18 +460,18 @@ const CampaignDetailPage = () => {
             <button 
               className="action-button rag-button"
               onClick={handleRagTrigger}
-              disabled={isButtonDisabled('rag')}
+              disabled={isButtonDisabled('rag', campaign)}
             >
               RAG DB 반영
             </button>
-            <span className="tooltip-text">{getRagButtonTooltip(campaign.status)}</span>
+            <span className="tooltip-text">{getRagButtonTooltip(campaign)}</span>
           </div>
         </section>
 
         {['PROCESSING', 'REFINING'].includes(campaign.status) ? (
           <div className="processing-notice">
-            <h2>메시지 생성 중...</h2>
-            <p>AI가 메시지를 생성하고 있습니다. 잠시 후 페이지를 새로고침하여 확인해주세요.</p>
+            <h2>메시지 생성 중<span className="loading-dots"><span>.</span><span>.</span><span>.</span></span></h2>
+            <p key={tipKey} className="tip-message">{loadingTip}</p>
           </div>
         ) : (
           <>
@@ -414,6 +481,16 @@ const CampaignDetailPage = () => {
                   <div className="target-group-header">
                     <h2 className="target-group-name">{group.target_name}</h2>
                     <p className="target-group-features">{group.target_features}</p>
+                    <div className="classification-reason-container">
+                      <button onClick={() => toggleReason(group.target_group_index)} className="reason-toggle-button">
+                        {expandedReasons[group.target_group_index] ? '분류 근거 닫기' : '분류 근거 보기'}
+                      </button>
+                      {expandedReasons[group.target_group_index] && (
+                        <div className="classification-reason-text">
+                          <p>{group.classification_reason}</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="message-drafts-container">
                     {group.message_results.map((result) => (
@@ -423,25 +500,7 @@ const CampaignDetailPage = () => {
                             <h3>메시지 시안 {result.message_draft_index}</h3>
                           </div>
                           <p className="message-text">{result.message_text}</p>
-                          <div className="validator-report">
-                            <div className="report-title">AI Validator Report</div>
-                            <div className="report-item">
-                              <span>정책 준수:</span>
-                              <span className={`value ${result.validator_report.policy_compliance === 'PASS' ? 'safe' : ''}`}>
-                                {result.validator_report.policy_compliance}
-                              </span>
-                            </div>
-                            <div className="report-item">
-                              <span>스팸 위험도:</span>
-                              <span className="value">{result.validator_report.spam_risk_score}%</span>
-                            </div>
-                            <div className="report-item">
-                              <strong>검토 요약:</strong> {result.validator_report.review_summary}
-                            </div>
-                            <div className="report-item">
-                              <strong>권장 조치:</strong> {result.validator_report.recommended_action}
-                            </div>
-                          </div>
+                          <AiValidatorReport report={result.validator_report} />
                         </div>
                         <div className="action-buttons">
                           <button 
@@ -477,7 +536,14 @@ const CampaignDetailPage = () => {
         onSubmit={handlePerformanceSubmit}
         initialActualCtr={campaign.actualCtr}
         initialConversionRate={campaign.conversionRate}
-        initialIsSuccessCase={campaign.status === 'SUCCESS_CASE'}
+        initialPerformanceStatus={
+          ['PROCESSING', 'REFINING', 'COMPLETED'].includes(campaign.status)
+            ? "UNDECIDED"
+            : campaign.successCase
+              ? "SUCCESS"
+              : "FAILURE"
+        }
+        initialPerformanceNotes={campaign.performanceNotes}
       />
       <RefineRequestModal
         isOpen={isRefineModalOpen}

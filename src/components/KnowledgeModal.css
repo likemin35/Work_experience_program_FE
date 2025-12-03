@@ -17,8 +17,18 @@
   border-radius: 8px;
   width: 100%;
   max-width: 600px;
+  max-height: 90vh; /* Add max-height */
+  overflow-y: auto; /* Allow scrolling for small screens */
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   position: relative;
+  display: flex; /* Use flexbox */
+  flex-direction: column; /* Stack children vertically */
+}
+
+.knowledge-form {
+  display: flex;
+  flex-direction: column;
+  /* flex-grow and min-height removed */
 }
 
 .close-button {
@@ -38,10 +48,17 @@
   border-bottom: 1px solid #eee;
   padding-bottom: 1rem;
   margin-bottom: 1.5rem;
+  flex-shrink: 0; /* Prevent header from shrinking */
 }
 
 .form-group {
   margin-bottom: 1.5rem;
+  display: flex; /* Use flexbox for alignment */
+  flex-direction: column; /* Stack label and input */
+}
+
+.form-group.textarea-group {
+  /* flex-grow and min-height removed */
 }
 
 .form-group label {
@@ -52,7 +69,6 @@
 }
 
 .form-group input,
-.form-group textarea,
 .form-group select {
   width: 100%;
   padding: 0.75rem;
@@ -63,8 +79,15 @@
 }
 
 .form-group textarea {
-  min-height: 150px;
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  box-sizing: border-box;
+  height: 250px; /* Set a fixed default height */
   resize: vertical;
+  /* flex-grow removed */
 }
 
 .form-actions {
@@ -72,6 +95,7 @@
   justify-content: flex-end;
   gap: 1rem;
   margin-top: 2rem;
+  flex-shrink: 0; /* Prevent actions from shrinking */
 }
 
 .form-actions button {

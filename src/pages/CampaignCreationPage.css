@@ -1,24 +1,24 @@
 .campaign-creation-container {
-  padding: 2.5rem; /* Increased padding */
+  padding: 2.5rem;
   max-width: 800px;
   margin: 2rem auto;
-  background-color: #fdfdfd; /* Slightly brighter background */
+  background-color: #fdfdfd;
   border-radius: 8px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* More emphasized shadow */
-  border: 1px solid #e0e0e0; /* Added border */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e0e0e0;
 }
 
 .campaign-creation-container h1 {
-  font-size: 2.2rem; /* Increased font size */
-  font-weight: 700; /* Bold font weight */
+  font-size: 2.2rem;
+  font-weight: 700;
   margin-bottom: 1.5rem;
-  background: linear-gradient(to right, #4A90E2, #00C6FF); /* Gradient text */
+  background: linear-gradient(to right, #4A90E2, #00C6FF);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  color: transparent; /* Fallback for non-webkit browsers */
+  color: transparent;
   text-align: center;
-  border-bottom: 3px solid #4A90E2; /* Emphasized border */
-  padding-bottom: 10px; /* Added padding */
+  border-bottom: 3px solid #4A90E2;
+  padding-bottom: 10px;
 }
 
 .creation-form .form-group {
@@ -27,9 +27,10 @@
 
 .creation-form label {
   display: block;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #555;
+  font-size: 1.1rem; /* Increased size */
+  font-weight: 700; /* Bolder */
+  margin-bottom: 0.75rem; /* Increased margin */
+  color: #333; /* Darker color */
 }
 
 .creation-form input[type="text"],
@@ -53,11 +54,205 @@
   resize: vertical;
 }
 
+.url-input-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.url-input-group input {
+  flex-grow: 1;
+  margin-right: 0.5rem;
+}
+
+.remove-url-btn, .add-url-btn {
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.remove-url-btn {
+  background-color: #f44336;
+  color: white;
+  padding: 0.75rem 0.8rem;
+  box-sizing: border-box;
+  white-space: nowrap;
+}
+
+.remove-url-btn:hover {
+  background-color: #d32f2f;
+}
+
+.add-url-btn {
+  background-color: #4A90E2;
+  color: white;
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+}
+
+.add-url-btn:hover {
+  background-color: #357ABD;
+}
+
 .creation-form .form-hint {
   font-size: 0.875rem;
   color: #888;
   margin-top: 0.5rem;
 }
+
+.section-divider {
+  border: none;
+  border-top: 1px solid #e0e0e0;
+  margin: 2.5rem 0;
+}
+
+/* --- New Custom Columns Table Styles --- */
+.custom-columns-table {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #fff;
+  overflow: hidden; /* To contain border-radius */
+}
+
+.custom-columns-header {
+  display: flex;
+  background-color: #f7f9fc;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.header-key { flex: 2.5; }
+.header-type { flex: 1.5; text-align: center; }
+.header-remove { flex: 0.5; text-align: center; }
+
+.custom-column-entry {
+  border-bottom: 1px solid #e0e0e0;
+}
+.custom-column-entry:last-child {
+  border-bottom: none;
+}
+
+.custom-column-main-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
+}
+
+.column-key-input { flex: 2.5; }
+.segmented-control { flex: 1.5; display: flex; justify-content: center; }
+.remove-column-cell { flex: 0.5; text-align: center; }
+
+.segmented-control button {
+  background-color: #fff;
+  color: #4A90E2;
+  border: 1px solid #4A90E2;
+  padding: 0.5rem 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap; /* Prevent text wrapping */
+}
+.segmented-control button:first-child {
+  border-radius: 5px 0 0 5px;
+}
+.segmented-control button:last-child {
+  border-radius: 0 5px 5px 0;
+  border-left: none;
+}
+.segmented-control button.active {
+  background-color: #4A90E2;
+  color: #fff;
+}
+
+.custom-column-values-container {
+  padding: 0.5rem 1rem 1rem 1rem;
+  background-color: #fdfdfd;
+  border-top: 1px dashed #e0e0e0;
+  margin-top: 0.5rem;
+}
+
+.custom-column-value-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.custom-column-value-row input {
+  flex-grow: 1;
+}
+.single-value-input {
+  width: 100%;
+}
+
+.remove-value-btn, .add-value-btn {
+  font-family: monospace;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  background-color: #f0f0f0;
+  line-height: 1;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.remove-value-btn {
+  width: 24px;
+  height: 24px;
+  color: #f44336;
+}
+.remove-value-btn:hover { background-color: #e0e0e0; }
+
+.add-value-row {
+  text-align: center;
+  padding-top: 0.5rem;
+}
+
+.add-value-btn {
+  width: 28px;
+  height: 28px;
+  color: #4A90E2;
+}
+.add-value-btn:hover { background-color: #e0e0e0; }
+
+.remove-column-btn {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap; /* Prevent text wrapping */
+}
+.remove-column-btn:hover { 
+  background-color: #d32f2f;
+}
+
+.add-column-btn {
+  display: block; /* Make it a block to center it */
+  margin: 1.5rem auto 0.5rem auto; /* Center the button */
+  padding: 0.6rem 1.5rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+  background-color: #4A90E2;
+  color: white;
+  transition: background-color 0.2s;
+}
+.add-column-btn:hover {
+  background-color: #357ABD;
+}
+
 
 .submit-btn-container {
   text-align: center;
@@ -69,17 +264,17 @@
   font-size: 1.1rem;
   font-weight: 600;
   color: #fff;
-  background: linear-gradient(to right, #4A90E2, #00C6FF); /* Updated to main blue */
+  background: linear-gradient(to right, #4A90E2, #00C6FF);
   border: none;
   border-radius: 5px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4); /* Updated shadow */
+  box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4);
 }
 
 .submit-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(74, 144, 226, 0.5); /* Updated shadow on hover */
+  box-shadow: 0 6px 20px rgba(74, 144, 226, 0.5);
 }
 
 .status-message {
