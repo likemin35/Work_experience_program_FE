@@ -223,15 +223,15 @@ const CampaignListPage: React.FC = () => {
 
                       <td>{campaign.requestDate ? new Date(campaign.requestDate.replace(' ', 'T')).toLocaleDateString() : '날짜 없음'}</td>
 
-                      <td>
+                                            <td className="campaign-purpose-cell">
 
-                        <Link to={`/campaign/${campaign.campaignId}`} className="campaign-link">
+                                              <Link to={`/campaign/${campaign.campaignId}`} className="campaign-link">
 
-                          {campaign.purpose}
+                                                {campaign.purpose}
 
-                        </Link>
+                                              </Link>
 
-                      </td>
+                                            </td>
 
                       <td><span className={`status-badge status-${campaign.status}`}>{statusMap[campaign.status] || campaign.status}</span></td>
 

@@ -123,6 +123,13 @@
     font-weight: 600;
     transition: color 0.3s ease;
     cursor: pointer;
+    max-width: 300px; /* Adjust as needed */
+}
+
+.knowledge-title-content {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .knowledge-title:hover {
@@ -141,6 +148,23 @@
     font-size: 1.2rem;
     font-weight: 500;
 }
+
+.source-badge {
+    padding: 0.4em 0.8em;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #fff;
+    text-transform: uppercase;
+}
+
+.source-policy { background-color: #3498db; } /* Blue */
+.source-terms { background-color: #95a5a6; } /* Gray */
+.source-success { background-color: #2ecc71; } /* Green */
+.source-failure { background-color: #e74c3c; } /* Red */
+.source-guide { background-color: #9b59b6; } /* Purple */
+.source-default { background-color: #7f8c8d; } /* Asbestos */
+
 
 @media (max-width: 768px) {
     .filter-and-search {

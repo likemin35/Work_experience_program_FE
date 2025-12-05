@@ -1,49 +1,52 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './KnowledgeManagementPage.css';
-
 import KnowledgeDetailModal from './KnowledgeDetailModal';
 import KnowledgeCreationModal from '../components/KnowledgeCreationModal';
 import KnowledgeEditModal from '../components/KnowledgeEditModal';
 
-// API 목록 응답을 위한 타입
+// 타입 정의 (파일 내부에 임시적으로 정의하거나, 별도 파일에서 import 해야 합니다)
 interface KnowledgeListItem {
   knowledge_id: string;
   title: string;
-  source_type: '정책' | '약관' | '성공_사례' | '실패_사례';
+  source_type: string;
   upload_date: string;
 }
 
-// API 상세 응답을 위한 타입
 interface KnowledgeDetail {
-  document: string;
+  // 상세 정보에 필요한 필드를 정의합니다.
   id: string;
   metadata: {
     title: string;
+    source_type: string;
     registration_date: string;
-    source_type: '정책' | '약관' | '성공_사례' | '실패_사례';
-    campaign_id?: string;
+    content_text: string;
   };
 }
 
-// API에서 받아오는 원본 데이터 아이템 타입
 interface KnowledgeSourceItem {
-  id: string;
-  metadata: {
-    title: string;
-    source_type: '정책' | '약관' | '성공_사례' | '실패_사례';
-    registration_date: string;
-  };
+    id: string;
+    metadata: {
+        title: string;
+        source_type: string;
+        registration_date: string;
+    };
 }
 
-// Spring Pageable API 응답을 위한 타입 (RAG DB 페이지에 맞춰 필드명 조정)
 interface Page<T> {
-  knowledge_base?: T[]; // New key for paginated response
-  data?: T[]; // Old key for non-paginated response
-  total_pages: number;
-  total_documents: number;
-  page_size: number;
+    knowledge_base?: T[];
+    data?: T[];
+    total_pages: number;
 }
+
+const sourceTypeMap: { [key: string]: string } = {
+  '성공_사례': 'success',
+  '실패_사례': 'failure',
+  '정책': 'policy',
+  '약관': 'terms',
+  '가이드': 'guide',
+};
+
 
 const KnowledgeManagementPage: React.FC = () => {
   const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeListItem[]>([]);
@@ -51,6 +54,7 @@ const KnowledgeManagementPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [filterSourceType, setFilterSourceType] = useState<string>('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
 
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [knowledgeDetail, setKnowledgeDetail] = useState<KnowledgeDetail | null>(null);
@@ -60,22 +64,46 @@ const KnowledgeManagementPage: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedKnowledgeForEdit, setSelectedKnowledgeForEdit] = useState<any | null>(null);
 
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1); // 페이지를 1-based로 변경
   const [totalPages, setTotalPages] = useState(0);
   const pageSize = 10;
+
+  // Debounce search term to prevent API calls on every keystroke
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      // Only trigger a new search if the debounced term is different
+      if (searchTerm !== debouncedSearchTerm) {
+        setDebouncedSearchTerm(searchTerm);
+        setCurrentPage(1); // Reset to first page for new search
+      }
+    }, 500); // 500ms delay
+
+    // Cleanup timeout on component unmount or if searchTerm changes
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchTerm, debouncedSearchTerm]);
+
 
   const fetchKnowledge = async () => {
     try {
       setLoading(true);
-      const params: { source_type?: string; title?: string } = {};
+
+      // 모든 파라미터를 하나의 객체로 관리하여 axios에 전달
+      const params: any = {
+        page: currentPage, // 1-based 페이지 전송
+        size: pageSize,
+      };
+
       if (filterSourceType !== 'all') {
         params.source_type = filterSourceType;
       }
-      if (searchTerm) {
-        params.title = searchTerm;
+      // Use the debounced term for the API call
+      if (debouncedSearchTerm) {
+        params.title = debouncedSearchTerm;
       }
 
-      const response = await axios.get<Page<KnowledgeSourceItem>>(`/api/knowledge?page=${currentPage}&size=${pageSize}`, { params });
+      const response = await axios.get<Page<KnowledgeSourceItem>>('/api/knowledge', { params });
       
       const items = response.data.knowledge_base || response.data.data || [];
 
@@ -86,7 +114,7 @@ const KnowledgeManagementPage: React.FC = () => {
         upload_date: item.metadata.registration_date,
       }));
 
-      // 날짜를 기준으로 내림차순 정렬
+      // 날짜를 기준으로 내림차순 정렬 (클라이언트 측)
       transformedKnowledgeBase.sort((a, b) => new Date(b.upload_date).getTime() - new Date(a.upload_date).getTime());
       
       setKnowledgeBase(transformedKnowledgeBase);
@@ -99,16 +127,10 @@ const KnowledgeManagementPage: React.FC = () => {
     }
   };
 
+  // Main data fetching effect, now depends on the debounced search term
   useEffect(() => {
-    // Reset to first page when filters or search term change
-    if (currentPage !== 0 && (filterSourceType !== 'all' || searchTerm !== '')) {
-      setCurrentPage(0);
-    } else {
-      fetchKnowledge();
-    }
-  }, [currentPage, filterSourceType, searchTerm]);
-
-  // Remove filteredAndSortedKnowledgeBase useMemo as filtering/sorting will be handled by backend
+    fetchKnowledge();
+  }, [currentPage, filterSourceType, debouncedSearchTerm]);
 
 
   const handleOpenDetailModal = async (knowledgeId: string) => {
@@ -121,8 +143,6 @@ const KnowledgeManagementPage: React.FC = () => {
       console.error("Error fetching knowledge detail:", error);
       setError('상세 정보를 불러오는 데 실패했습니다.');
       setIsDetailModalOpen(false);
-    } finally {
-      setLoadingDetail(false);
     }
   };
 
@@ -185,13 +205,17 @@ const KnowledgeManagementPage: React.FC = () => {
         <select
           className="status-filter"
           value={filterSourceType}
-          onChange={(e) => setFilterSourceType(e.target.value)}
+          onChange={(e) => {
+            setCurrentPage(1); // 1-based로 리셋
+            setFilterSourceType(e.target.value);
+          }}
         >
           <option value="all">모든 출처</option>
           <option value="정책">정책</option>
           <option value="약관">약관</option>
           <option value="성공_사례">성공 사례</option>
           <option value="실패_사례">실패 사례</option>
+          <option value="가이드">가이드</option>
         </select>
         <button className="new-knowledge-button" onClick={handleOpenCreateModal}>신규 지식 등록</button>
       </div>
@@ -218,9 +242,13 @@ const KnowledgeManagementPage: React.FC = () => {
                   className="knowledge-title"
                   onClick={() => handleOpenDetailModal(item.knowledge_id)}
                 >
-                  {item.title}
+                  <div className="knowledge-title-content">{item.title}</div>
                 </td>
-                <td>{item.source_type}</td>
+                <td>
+                  <span className={`source-badge source-${sourceTypeMap[item.source_type] || 'default'}`}>
+                    {item.source_type}
+                  </span>
+                </td>
               </tr>
             ))
           ) : (
@@ -234,23 +262,23 @@ const KnowledgeManagementPage: React.FC = () => {
       {totalPages > 1 && (
         <div className="pagination-controls">
           <button
-            onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
-            disabled={currentPage === 0}
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
           >
             이전
           </button>
           {[...Array(totalPages)].map((_, i) => (
             <button
-              key={i}
-              onClick={() => setCurrentPage(i)}
-              className={currentPage === i ? 'active' : ''}
+              key={i + 1}
+              onClick={() => setCurrentPage(i + 1)}
+              className={currentPage === i + 1 ? 'active' : ''}
             >
               {i + 1}
             </button>
           ))}
           <button
-            onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
-            disabled={currentPage === totalPages - 1}
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
           >
             다음
           </button>

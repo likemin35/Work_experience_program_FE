@@ -8,7 +8,7 @@ interface KnowledgeDetail {
   metadata: {
     title: string;
     registration_date: string;
-    source_type: '정책' | '약관' | '성공_사례' | '실패_사례';
+    source_type: '정책' | '약관' | '성공_사례' | '실패_사례' | '가이드';
     campaign_id?: string;
   };
 }

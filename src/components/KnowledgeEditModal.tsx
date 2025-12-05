@@ -8,7 +8,7 @@ interface KnowledgeDetail {
   metadata: {
     title: string;
     registration_date: string;
-    source_type: '정책' | '약관' | '성공_사례' | '실패_사례';
+    source_type: '정책' | '약관' | '성공_사례' | '실패_사례' | '가이드';
     campaign_id?: string;
   };
 }
@@ -23,7 +23,7 @@ interface KnowledgeEditModalProps {
 const KnowledgeEditModal: React.FC<KnowledgeEditModalProps> = ({ isOpen, onClose, onKnowledgeUpdated, knowledgeItem }) => {
   const [title, setTitle] = useState('');
   const [contentText, setContentText] = useState('');
-  const [sourceType, setSourceType] = useState<'정책' | '약관' | '성공_사례' | '실패_사례'>('정책');
+  const [sourceType, setSourceType] = useState<'정책' | '약관' | '성공_사례' | '실패_사례' | '가이드'>('정책');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -105,12 +105,13 @@ const KnowledgeEditModal: React.FC<KnowledgeEditModalProps> = ({ isOpen, onClose
             <select
               id="sourceType"
               value={sourceType}
-              onChange={(e) => setSourceType(e.target.value as '정책' | '약관' | '성공_사례' | '실패_사례')}
+              onChange={(e) => setSourceType(e.target.value as '정책' | '약관' | '성공_사례' | '실패_사례' | '가이드')}
             >
               <option value="정책">정책</option>
               <option value="약관">약관</option>
               <option value="성공_사례">성공 사례</option>
               <option value="실패_사례">실패 사례</option>
+              <option value="가이드">가이드</option>
             </select>
           </div>
           {error && <p className="error-message">{error}</p>}

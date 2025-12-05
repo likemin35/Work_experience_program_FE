@@ -117,7 +117,16 @@
     vertical-align: middle;
 }
 
+.campaign-purpose-cell {
+    /* Adjust this value based on your desired max width */
+    max-width: 300px; 
+}
+
 .campaign-link {
+    display: block; /* Or inline-block */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     text-decoration: none;
     color: #2980b9;
     font-weight: 600;
