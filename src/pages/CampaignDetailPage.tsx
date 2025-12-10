@@ -209,9 +209,14 @@ const CampaignDetailPage = () => {
   const [loadingTip, setLoadingTip] = useState('');
   const [expandedReasons, setExpandedReasons] = useState<Record<number, boolean>>({});
   const [tipKey, setTipKey] = useState(0); // New state for dynamic tip transition
+  const [isTitleExpanded, setIsTitleExpanded] = useState(false);
 
   const toggleReason = (index: number) => {
     setExpandedReasons(prev => ({ ...prev, [index]: !prev[index] }));
+  };
+
+  const toggleTitle = () => {
+    setIsTitleExpanded(!isTitleExpanded);
   };
 
   const fetchCampaignDetail = async () => {
@@ -424,7 +429,13 @@ const CampaignDetailPage = () => {
   return (
     <div className="campaign-detail-container">
       <header className="campaign-detail-header">
-        <h1>{campaign.purpose}</h1>
+        <h1
+          className={!isTitleExpanded ? 'truncated' : ''}
+          onClick={toggleTitle}
+          title="클릭하여 전체 내용 보기"
+        >
+          {campaign.purpose}
+        </h1>
       </header>
 
       <main className="campaign-content">

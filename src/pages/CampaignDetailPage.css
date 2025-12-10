@@ -18,11 +18,17 @@
   background: linear-gradient(to right, #4A90E2, #00C6FF);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  
-  /* Properties for wrapping long text */
-  overflow-wrap: break-word;
-  word-break: break-word;
-  min-width: 0; /* Helps with flexbox wrapping */
+  cursor: pointer;
+  /* No truncation by default */
+}
+
+.campaign-detail-header h1.truncated {
+  /* For responsive multi-line truncation */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2; /* Limit to 2 lines */
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .delete-button {
