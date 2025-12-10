@@ -37,6 +37,10 @@
     font-family: 'Arial Black', sans-serif;
 }
 
+.logo-link {
+  text-decoration: none;
+}
+
 .logo-main {
     background: linear-gradient(to right, #4A90E2, #00C6FF);
     -webkit-background-clip: text;

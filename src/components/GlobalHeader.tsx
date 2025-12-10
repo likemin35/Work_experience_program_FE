@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 import ktLogo from '../assets/KT_Logo.png';
 
 const GlobalHeader: React.FC = () => {
@@ -11,11 +11,13 @@ const GlobalHeader: React.FC = () => {
 
     return (
         <header className="global-header">
-            <div className="logo">
-                <span className="logo-main">MAIX</span>
-                <span className="logo-separator">|</span>
-                <img src={ktLogo} alt="KT Logo" className="logo-kt-img" />
-            </div>
+            <Link to="/" className="logo-link">
+                <div className="logo">
+                    <span className="logo-main">MAIX</span>
+                    <span className="logo-separator">|</span>
+                    <img src={ktLogo} alt="KT Logo" className="logo-kt-img" />
+                </div>
+            </Link>
             <button className="hamburger-menu" onClick={toggleMenu}>
                 <span></span>
                 <span></span>
