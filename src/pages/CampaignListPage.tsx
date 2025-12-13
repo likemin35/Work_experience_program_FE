@@ -13,6 +13,8 @@ interface Campaign {
   source_url: string | null;
   status: string; // 백엔드에서 오는 영문 상태값 (e.g., "COMPLETED")
   updated_at: string;
+  actualCtr?: number; // Updated field name for actual click-through rate
+  conversionRate?: number; // New field for conversion rate
 }
 
 // Spring Pageable API 응답을 위한 타입
@@ -34,7 +36,7 @@ const statusMap: { [key: string]: string } = {
   MESSAGE_SELECTED: '메시지 선택 완료',
   PERFORMANCE_REGISTERED: '성과 등록 완료',
   SUCCESS_CASE: '성공 사례 지정',
-  RAG_REGISTERED: 'RAG DB 등록 완료',
+  RAG_REGISTERED: 'AI 학습완료',
 };
 
 const CampaignListPage: React.FC = () => {
@@ -45,6 +47,7 @@ const CampaignListPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(0); // 0-indexed for Spring Data JPA
   const [totalPages, setTotalPages] = useState(0);
+  const [totalCampaigns, setTotalCampaigns] = useState(0); // New state for total elements
   const pageSize = 10; // Number of items per page
 
     const fetchCampaigns = async () => {
@@ -75,13 +78,23 @@ const CampaignListPage: React.FC = () => {
 
   
 
-        const response = await axios.get<Page<Campaign>>(`/api/campaigns?${params.toString()}`);
+                const response = await axios.get<Page<Campaign>>(`/api/campaigns?${params.toString()}`);
 
-        setCampaigns(response.data.content); // Backend is now assumed to handle sorting and filtering
+  
 
-        setTotalPages(response.data.totalPages);
+                setCampaigns(response.data.content); // Backend is now assumed to handle sorting and filtering
 
-      } catch (e) {
+  
+
+                setTotalPages(response.data.totalPages);
+
+  
+
+                setTotalCampaigns(response.data.totalElements); // Set total elements
+
+  
+
+              } catch (e) {
 
         if (axios.isAxiosError(e)) {
 
@@ -197,17 +210,19 @@ const CampaignListPage: React.FC = () => {
 
               <thead>
 
-                <tr>
+                                                                                                                                <tr>
 
-  
+                                                                                                                                  <th>No.</th>
 
-                  <th>요청일</th>
+                                                                                                                                  <th>캠페인 제목</th>
 
-                  <th>캠페인 목적</th>
+                                                                                                                                  <th>클릭률</th>
 
-                  <th>상태</th>
+                                                                                                                                  <th>전환률</th>
 
-                </tr>
+                                                                                                                                  <th>상태</th>
+
+                                                                                                                                </tr>
 
               </thead>
 
@@ -215,39 +230,47 @@ const CampaignListPage: React.FC = () => {
 
                 {campaigns.length > 0 ? (
 
-                  campaigns.map((campaign, index) => (
+                                                                        campaigns.map((campaign, index) => (
 
-                    <tr key={campaign.campaignId || index}>
+                                                                                                                                                              <tr key={campaign.campaignId || index}>
 
-  
+                                                                                                                                                                <td>{totalCampaigns - (currentPage * pageSize) - index}</td>
 
-                      <td>{campaign.requestDate ? new Date(campaign.requestDate.replace(' ', 'T')).toLocaleDateString() : '날짜 없음'}</td>
+                                                                                                                                                                <td className="campaign-purpose-cell">
 
-                                            <td className="campaign-purpose-cell">
+                                                                                                                                                                    <Link to={`/campaign/${campaign.campaignId}`} className="campaign-link" title={campaign.purpose}>
 
-                                                                                            <Link to={`/campaign/${campaign.campaignId}`} className="campaign-link" title={campaign.purpose}>
+                                                                                                                                                                        <div className="campaign-title-display">{campaign.purpose}</div>
 
-                                                                                              {campaign.purpose}
+                                                                                                                                                                        <div className="campaign-date-display">
 
-                                                                                            </Link>
+                                                                                                                                                                            [{campaign.requestDate ? new Date(campaign.requestDate.replace(' ', 'T')).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }) : '날짜 없음'}]
 
-                                            </td>
+                                                                                                                                                                        </div>
 
-                      <td><span className={`status-badge status-${campaign.status}`}>{statusMap[campaign.status] || campaign.status}</span></td>
+                                                                                                                                                                    </Link>
 
-                    </tr>
+                                                                                                                                                                </td>
 
-                  ))
+                                                                                                                                                                <td>{campaign.actualCtr == null ? '-' : `${campaign.actualCtr}%`}</td>
 
-                ) : (
+                                                                                                                                                                <td>{campaign.conversionRate == null ? '-' : `${campaign.conversionRate}%`}</td>
 
-                  <tr>
+                                                                                                                                                                <td><span className={`status-badge status-${campaign.status}`}>{statusMap[campaign.status] || campaign.status}</span></td>
 
-                    <td colSpan={4} style={{ textAlign: 'center' }}>결과가 없습니다.</td>
+                                                                                                                                                              </tr>
 
-                  </tr>
+                                                                                                ))
 
-                )}
+                                                                                              ) : (
+
+                                                                                                <tr>
+
+                                                                                                  <td colSpan={5} style={{ textAlign: 'center' }}>결과가 없습니다.</td>
+
+                                                                                                </tr>
+
+                                                                                              )}
 
               </tbody>
 

@@ -2,7 +2,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
-  background-color: #f9faff;
+  background-color: #ffffff; /* Changed from #f9faff to white */
 }
 
 .campaign-detail-header {

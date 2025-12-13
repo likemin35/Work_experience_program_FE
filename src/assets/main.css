@@ -1,44 +1,49 @@
 /* src/assets/main.css */
 
-/* --- Contents from App.css --- */
+/* --- Global Layout --- */
+:root {
+  --header-height: 60px;
+}
+
 #root {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  background-color: #ffffff;
+  width: 100vw;
+  height: 100vh;
+  overflow-x: hidden;
 }
 
 .main-content {
-  flex: 1; /* 남은 공간을 모두 차지하도록 설정 */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  padding: 20px;
+  padding-top: var(--header-height); /* Space for the fixed header */
+  background-color: #ffffff; /* Changed from #f9f9f9 to white */
+  height: 100%;
   box-sizing: border-box;
 }
 
-/* --- Contents from components/GlobalHeader.css --- */
+/* --- Top Header --- */
 .global-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 10px 40px;
+    padding: 0 20px;
     background-color: #ffffff;
-    border-bottom: 1px solid #eaeaea;
-    position: relative; /* For positioning the mobile menu */
-}
-
-.logo {
-    display: flex;
-    align-items: center; /* 세로 중앙 정렬 */
-    font-size: 2.5rem;
-    font-weight: bold;
-    font-family: 'Arial Black', sans-serif;
+    height: var(--header-height);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    gap: 20px; /* Add space between hamburger and logo */
 }
 
 .logo-link {
   text-decoration: none;
+  /* The logo is now aligned by the parent flex container */
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    font-size: 2rem; /* Slightly smaller for the top bar */
+    font-weight: bold;
+    font-family: 'Arial Black', sans-serif;
 }
 
 .logo-main {
@@ -51,42 +56,16 @@
 .logo-separator {
     font-size: 1.5rem;
     color: #AAAAAA;
-    margin: 0 10px;
+    margin: 0 8px;
     font-weight: 300;
 }
 
 .logo-kt-img {
-    height: 28px; /* KT 로고 이미지 높이 조정 */
-}
-
-.nav-menu ul {
-    list-style: none;
-    display: flex;
-    gap: 40px;
-    margin: 0;
-    padding: 0;
-}
-
-.nav-menu li a {
-    text-decoration: none;
-    color: #333333;
-    font-size: 1.1rem;
-    font-weight: 500;
-    transition: color 0.3s ease;
-    padding: 5px 0; /* Add padding for better touch targets */
-}
-
-.nav-menu li a:hover,
-.nav-menu li a.active {
-    background: linear-gradient(to right, #4A90E2, #00C6FF);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    font-weight: 700;
+    height: 24px;
 }
 
 .hamburger-menu {
-    display: none; /* Hide by default */
+    display: flex;
     flex-direction: column;
     justify-content: space-around;
     width: 30px;
@@ -95,7 +74,7 @@
     border: none;
     cursor: pointer;
     padding: 0;
-    z-index: 10;
+    z-index: 1001; /* Above logo */
 }
 
 .hamburger-menu span {
@@ -106,173 +85,298 @@
     transition: all 0.3s linear;
 }
 
-
-/* Responsive Styles */
-@media (max-width: 768px) {
-    .global-header {
-        padding: 20px;
-        flex-wrap: wrap;
-    }
-
-    .hamburger-menu {
-        display: flex;
-    }
-
-    .nav-menu {
-        display: none;
-        width: 100%;
-    }
-
-    .nav-menu.active {
-        display: block;
-        position: absolute;
-        top: 80px; /* Adjust based on header height */
-        left: 0;
-        background-color: white;
-        width: 100%;
-        border-top: 1px solid #eaeaea;
-        padding: 20px 0;
-    }
-
-    .nav-menu ul {
-        flex-direction: column;
-        gap: 20px;
-        align-items: center;
-        width: 100%;
-    }
-
-    .nav-menu li {
-        width: 100%;
-        text-align: center;
-    }
+.hamburger-menu.open {
+    z-index: 2001; /* Ensure it's above the nav-drawer when open */
 }
 
-/* --- Contents from components/GlobalFooter.css --- */
-.global-footer {
-    background-color: #f8f9fa; /* 아주 밝은 회색으로 변경 */
-    color: #6c757d; /* 어두운 회색으로 텍스트 색상 변경 */
-    text-align: center;
-    padding: 30px 40px; /* 패딩을 좀 더 넉넉하게 조정 */
-    margin-top: auto;
-    border-top: 1px solid #e9ecef; /* 상단에 얇은 경계선 추가 */
+/* Hamburger to X transformation */
+.hamburger-menu.open span:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
 }
 
-.footer-content p {
-    margin: 0;
-    font-size: 0.9rem;
-    color: #6c757d; /* p 태그 색상 명시 */
+.hamburger-menu.open span:nth-child(2) {
+    opacity: 0;
 }
 
-.footer-links {
-    margin-top: 10px;
+.hamburger-menu.open span:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
 }
 
-.footer-links a {
-    color: #6c757d; /* 링크 색상 변경 */
-    text-decoration: none;
-    margin: 0 10px; /* 링크 좌우 마진 추가 */
-    transition: color 0.2s ease-in-out;
-}
 
-.footer-links a:hover {
-    color: #343a40; /* 호버 시 색상 진하게 변경 */
-    text-decoration: underline;
-}
-
-/* --- Contents from pages/Home.css --- */
-.home-container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    width: 100%;
-    max-width: 1400px; /* 최대 너비 설정 */
-    align-items: center; /* 자식 요소들을 가운데 정렬 */
-}
-
-.home-section {
-    background-color: #f9f9f9;
-    border: 1px solid #eaeaea;
-    border-radius: 8px;
+/* --- Navigation Drawer --- */
+.nav-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 280px;
+    background-color: #ffffff; /* Reverted to white */
+    border-right: 1px solid #eaeaea;
     padding: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    flex: 1; /* Allow flexbox to manage width */
-    min-width: 0; /* Prevent content overflow issues in flex items */
+    box-sizing: border-box;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 2000;
 }
 
-.dashboard-layout {
-    display: flex;
-    flex-direction: row;
-    gap: 20px;
-    width: 100%;
+.nav-drawer.open {
+    transform: translateX(0);
 }
 
-.dashboard-layout > .home-section {
-    min-height: 400px;
+.nav-menu {
+    margin-top: 60px; /* Space for a header/title within the drawer if needed */
 }
 
-@media (max-width: 992px) {
-    .dashboard-layout {
-        flex-direction: column;
-    }
+/* New Promotion Button in Nav Drawer */
+.new-promotion-menu-btn {
+    display: block; /* Make it block level */
+    width: calc(100% - 30px); /* Adjust for padding within nav-drawer (20px left + 20px right = 40px, so 20px for one side) */
+    margin: 10px auto; /* Center with some margin */
+    padding: 12px 15px;
+    background: linear-gradient(to right, #007bff, #0056b3); /* Blue gradient */
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-align: center;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2);
 }
 
-.home-section h2 {
-    margin-top: 0;
-    color: #333;
-    border-bottom: 2px solid #4A90E2;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
+.new-promotion-menu-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 15px rgba(0, 123, 255, 0.3);
+    opacity: 0.9;
 }
 
-/* 각 섹션별 특화 스타일 (필요시 추가) */
-.centered-button-container {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    padding: 20px 0; /* 상하 여백 추가 */
-}
-
-.new-promotion-button {
-    background: linear-gradient(to right, #4A90E2, #00C6FF);
-    color: white;
-    border: none;
-    padding: 12px 24px; /* 버튼 크기 살짝 키움 */
-    border-radius: 8px; /* 둥근 모서리 */
-    cursor: pointer;
-    font-size: 1.1rem; /* 폰트 크기 살짝 키움 */
-    font-weight: bold;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4); /* 그림자 효과 추가 */
-}
-
-.new-promotion-button:hover {
-    transform: translateY(-2px); /* 호버 시 살짝 위로 이동 */
-    box-shadow: 0 6px 20px rgba(74, 144, 226, 0.5); /* 그림자 강화 */
-}
-
-#recent-promotions ul {
+.nav-menu ul {
     list-style: none;
     padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-#recent-promotions li {
-    padding: 8px 0;
-    border-bottom: 1px solid #eee;
+.nav-menu li a {
+    text-decoration: none;
+    color: #333333; /* Darker color for better contrast on white background */
+    font-size: 1.2rem;
+    font-weight: 500;
+    padding: 12px 15px;
+    border-radius: 8px;
+    display: block;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.nav-menu li a:hover {
+    background-color: #f0f0f0; /* Light gray on hover */
+    color: #333333; /* Keep dark text */
+}
+
+.nav-menu li a.active {
+    background: linear-gradient(90deg, #eef5ff, #e6f7ff); /* Light blue gradient for active */
+    color: #0052d9; /* Blue text for active link */
+    font-weight: 700;
 }
 
 
-/* Responsive Styles */
-@media (max-width: 768px) {
-    .dashboard-grid {
-        gap: 20px;
-    }
+/* --- Backdrop --- */
+.backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4);
+    z-index: 1999; /* Below the drawer, above everything else */
 }
 
-/* --- Styles for promotion title truncation --- */
-.promotion-title {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 500px; /* Adjust as needed */
+/* --- Misc page styles to keep UI clean --- */
+
+.home-container, .campaign-creation-container, .knowledge-list-container {
+
+    width: 100%;
+
+    max-width: 1400px;
+
+    margin: 0 auto;
+
 }
 
+
+
+/* --- New styles for Chat History in Nav Drawer --- */
+
+.nav-menu .static-menu {
+
+    margin-bottom: 10px;
+
+}
+
+
+
+.new-chat-link {
+
+    font-weight: bold !important;
+
+    font-size: 1.1rem !important;
+
+    border: 1px solid #ddd;
+
+    text-align: center;
+
+}
+
+
+
+.new-chat-link:hover {
+
+    background-color: #f7f7f7;
+
+}
+
+
+
+.menu-divider {
+
+    border: none;
+
+    border-top: 1px solid #eee;
+
+    margin: 15px 0;
+
+}
+
+
+
+.history-title {
+
+    font-size: 0.9rem;
+
+    color: #666;
+
+    margin: 0 0 10px 10px;
+
+    font-weight: bold;
+
+}
+
+
+
+.history-menu {
+
+    max-height: calc(100vh - 250px); /* Adjust as needed */
+
+    overflow-y: auto;
+    padding-right: 5px; /* Add padding to make space for scrollbar */
+
+}
+
+.chat-session-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Space out link and button */
+    /* Padding for the list item itself if needed */
+}
+
+/* Override default NavLink padding to allow flex item control */
+.chat-session-item .chat-link-text {
+    flex-grow: 1; /* Allow link to take available space */
+    margin-right: 5px; /* Space between link text and delete button */
+    padding: 8px 15px; /* Restore padding for the NavLink text part */
+    text-decoration: none;
+    color: #333333;
+    font-size: 1rem; /* Specific font size for history items */
+    font-weight: 500;
+    border-radius: 8px;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.chat-session-item .chat-link-text:hover {
+    background-color: #f0f0f0; /* Light gray on hover */
+    color: #333333;
+}
+
+.chat-session-item .chat-link-text.active {
+    background: linear-gradient(90deg, #eef5ff, #e6f7ff);
+    color: #0052d9;
+    font-weight: 700;
+}
+
+.delete-session-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px; /* Small padding around the icon */
+    display: flex; /* To center SVG */
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%; /* Make it circular */
+    transition: background-color 0.2s ease;
+    flex-shrink: 0; /* Prevent button from shrinking */
+    line-height: 0; /* Remove extra line height from button */
+    margin-left: auto; /* Push button to the right */
+}
+
+.delete-session-btn:hover {
+    background-color: #f0f0f0;
+}
+
+.delete-session-btn svg {
+    stroke: #888; /* Gray color for the icon */
+    width: 16px;
+    height: 16px;
+}
+
+.delete-session-btn:hover svg {
+    stroke: #dc3545; /* Red color on hover */
+}
+
+
+.history-menu li a {
+    /* Removed padding to avoid double padding with .chat-session-item .chat-link-text */
+    font-size: 1rem !important; /* Kept font-size from here */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+
+.show-more-btn {
+
+    width: 100%;
+
+    text-align: center;
+
+    background: none;
+
+    border: 1px solid #ddd;
+
+    border-radius: 8px;
+
+    padding: 10px;
+
+    margin-top: 10px;
+
+    cursor: pointer;
+
+    color: #333;
+
+    font-size: 0.9rem;
+
+}
+
+
+
+.show-more-btn:hover {
+
+    background-color: #f0f0f0;
+
+}

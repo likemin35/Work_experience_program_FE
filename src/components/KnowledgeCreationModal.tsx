@@ -78,7 +78,7 @@ const KnowledgeCreationModal: React.FC<KnowledgeCreationModalProps> = ({ isOpen,
             />
           </div>
           <div className="form-group">
-            <label htmlFor="sourceType">출처</label>
+            <label htmlFor="sourceType">분류</label>
             <select
               id="sourceType"
               value={sourceType}

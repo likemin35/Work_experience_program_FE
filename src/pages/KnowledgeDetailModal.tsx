@@ -68,7 +68,7 @@ const KnowledgeDetailModal: React.FC<KnowledgeDetailModalProps> = ({
             <div className="modal-body">
               <div className="info-grid">
                 <div className="info-item">
-                  <strong>출처:</strong>
+                  <strong>분류:</strong>
                   <span>{data.metadata.source_type}</span>
                 </div>
                 <div className="info-item">

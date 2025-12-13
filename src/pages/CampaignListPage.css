@@ -5,7 +5,7 @@
     max-width: 1200px;
     margin: 2rem auto;
     padding: 2rem;
-    background-color: #f9faff;
+    background-color: #ffffff; /* Changed from #f9faff to white */
     font-family: 'Pretendard', sans-serif;
 }
 
@@ -124,16 +124,27 @@
 
 .campaign-link {
     display: block; /* Or inline-block */
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
     text-decoration: none;
     color: #2980b9;
     font-weight: 600;
     transition: color 0.3s ease;
 }
 
-.campaign-link:hover {
+.campaign-title-display {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #2980b9; /* Keep link color for title */
+}
+
+.campaign-date-display {
+    font-size: 0.85em; /* Slightly smaller than title */
+    color: #777; /* Lighter color for date */
+    margin-top: 5px; /* Small space between title and date */
+}
+
+
+.campaign-link:hover .campaign-title-display {
     color: #3498db;
     text-decoration: underline;
 }

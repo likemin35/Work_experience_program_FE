@@ -38,6 +38,7 @@ interface Page<T> {
     knowledge_base?: T[];
     data?: T[];
     total_pages: number;
+    total_elements: number; // Added total_elements
 }
 
 const sourceTypeMap: { [key: string]: string } = {
@@ -67,6 +68,7 @@ const KnowledgeManagementPage: React.FC = () => {
 
   const [currentPage, setCurrentPage] = useState(1); // 페이지를 1-based로 변경
   const [totalPages, setTotalPages] = useState(0);
+  const [totalKnowledgeItems, setTotalKnowledgeItems] = useState(0); // New state for total elements
   const pageSize = 10;
 
   // Debounce search term to prevent API calls on every keystroke
@@ -118,6 +120,7 @@ const KnowledgeManagementPage: React.FC = () => {
       
       setKnowledgeBase(transformedKnowledgeBase);
       setTotalPages(response.data.total_pages);
+      setTotalKnowledgeItems(response.data.total_elements || 0); // Ensure total_elements is always a number
     } catch (err) {
       setError('지식 베이스 데이터를 불러오는 데 실패했습니다.');
       console.error('Error fetching knowledge base:', err);
@@ -193,7 +196,7 @@ const KnowledgeManagementPage: React.FC = () => {
   return (
     <div className="knowledge-list-container">
       <div className="knowledge-list-header">
-        <h1>RAG 지식 베이스 관리</h1>
+        <h1>AI 학습 데이터 관리</h1>
       </div>
       <div className="filter-and-search">
         <input
@@ -211,7 +214,7 @@ const KnowledgeManagementPage: React.FC = () => {
             setFilterSourceType(e.target.value);
           }}
         >
-          <option value="all">모든 출처</option>
+          <option value="all">모든 분류</option>
           <option value="정책">정책</option>
           <option value="약관">약관</option>
           <option value="성공_사례">성공 사례</option>
@@ -229,21 +232,26 @@ const KnowledgeManagementPage: React.FC = () => {
       <table className="knowledge-table">
         <thead>
           <tr>
-            <th>등록일</th>
-            <th>제목</th>
-            <th>출처</th>
+            <th>No.</th>
+            <th>학습 자료 이름</th>
+            <th>분류</th>
           </tr>
         </thead>
         <tbody>
           {knowledgeBase.length > 0 ? (
-            knowledgeBase.map(item => (
+            knowledgeBase.map((item, index) => (
               <tr key={item.knowledge_id}>
-                <td>{item.upload_date.split(' ')[0]}</td>
-                <td 
-                  className="knowledge-title"
-                  onClick={() => handleOpenDetailModal(item.knowledge_id)}
-                >
-                  <div className="knowledge-title-content">{item.title}</div>
+                <td>{(currentPage - 1) * pageSize + index + 1}</td>
+                <td className="knowledge-purpose-cell-title">
+                  <div 
+                    className="knowledge-title-content knowledge-title-clickable"
+                    onClick={() => handleOpenDetailModal(item.knowledge_id)}
+                  >
+                    {item.title}
+                  </div>
+                  <div className="knowledge-date-display">
+                    [{item.upload_date ? new Date(item.upload_date.replace(' ', 'T')).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }) : '날짜 없음'}]
+                  </div>
                 </td>
                 <td>
                   <span className={`source-badge source-${sourceTypeMap[item.source_type] || 'default'}`}>
@@ -254,7 +262,7 @@ const KnowledgeManagementPage: React.FC = () => {
             ))
           ) : (
             <tr>
-              <td colSpan={3} style={{ textAlign: 'center' }}>결과가 없습니다.</td>
+              <td colSpan={4} style={{ textAlign: 'center' }}>결과가 없습니다.</td>
             </tr>
           )}
         </tbody>

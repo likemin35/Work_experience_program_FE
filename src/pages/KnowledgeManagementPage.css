@@ -5,7 +5,7 @@
     max-width: 1200px;
     margin: 2rem auto;
     padding: 2rem;
-    background-color: #f9faff;
+    background-color: #ffffff; /* Changed from #f9faff to white */
     font-family: 'Pretendard', sans-serif;
 }
 
@@ -117,13 +117,22 @@
     vertical-align: middle;
 }
 
-.knowledge-title {
-    text-decoration: none;
-    color: #2980b9;
+/* New styling for knowledge title and date */
+.knowledge-purpose-cell-title {
+    vertical-align: middle;
+    max-width: 300px; /* Adjust as needed */
+}
+
+.knowledge-title-clickable {
+    cursor: pointer;
+    color: #2980b9; /* Link color */
     font-weight: 600;
     transition: color 0.3s ease;
-    cursor: pointer;
-    max-width: 300px; /* Adjust as needed */
+}
+
+.knowledge-title-clickable:hover {
+    color: #3498db;
+    text-decoration: underline;
 }
 
 .knowledge-title-content {
@@ -132,10 +141,12 @@
     text-overflow: ellipsis;
 }
 
-.knowledge-title:hover {
-    color: #3498db;
-    text-decoration: underline;
+.knowledge-date-display {
+    font-size: 0.85em; /* Slightly smaller than title */
+    color: #777; /* Lighter color for date */
+    margin-top: 5px; /* Small space between title and date */
 }
+
 
 .error-message {
     color: #e74c3c;

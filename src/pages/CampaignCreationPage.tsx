@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 import "./CampaignCreationPage.css";
 
@@ -21,6 +21,35 @@ const CampaignCreationPage = () => {
   const [status, setStatus] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const campaignData = location.state?.campaignData;
+    if (campaignData) {
+      setPurpose(campaignData.campaignTitle || "");
+      setCoreBenefit(campaignData.coreBenefitText || "");
+      
+      // Ensure sourceUrls is an array with at least one empty string for the input
+      const urls = campaignData.sourceUrls && campaignData.sourceUrls.length > 0 ? campaignData.sourceUrls : [""];
+      setSourceUrls(urls);
+
+      // Transform customColumns from API object to component state array
+      if (campaignData.customColumns && Object.keys(campaignData.customColumns).length > 0) {
+        const transformedColumns: CustomColumn[] = Object.entries(campaignData.customColumns).map(([key, value]) => {
+          if (Array.isArray(value)) {
+            return { key, valueType: 'multiple', values: value.length > 0 ? value : [""] };
+          } else {
+            return { key, valueType: 'single', values: [String(value)] };
+          }
+        });
+        setCustomColumns(transformedColumns);
+      } else {
+        // If no custom columns, ensure there's one empty one for the UI
+        setCustomColumns([{ key: "", valueType: "single", values: [""] }]);
+      }
+    }
+  }, [location.state]);
+
 
   // --- Handlers for Source URLs ---
   const handleUrlChange = (index: number, value: string) => {
@@ -147,7 +176,7 @@ const CampaignCreationPage = () => {
       <form onSubmit={handleSubmit} className="creation-form">
         {/* --- Purpose and Core Benefit (unchanged) --- */}
         <div className="form-group">
-          <label htmlFor="purpose">프로모션 목적</label>
+          <label htmlFor="purpose">프로모션 제목</label>
           <input type="text" id="purpose" value={purpose} onChange={(e) => setPurpose(e.target.value)} placeholder="예: 20대 신규 고객 확보" required />
         </div>
 
