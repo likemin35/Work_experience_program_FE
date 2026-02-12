@@ -1,0 +1,121 @@
+.segment-result-container {
+  padding: 2.5rem;
+  max-width: 1200px;
+  margin: 2rem auto;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  border: 1px solid #e0e0e0;
+}
+
+.segment-result-container h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  background: linear-gradient(to right, #161718, #090b0b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  border-bottom: 3px solid #101316;
+  padding-bottom: 0.75rem;
+}
+
+/* 상단 액션 영역 */
+.segment-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.segment-actions button {
+  padding: 0.6rem 1.4rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 5px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.25s ease;
+}
+
+/* CSV 버튼 */
+.csv-btn {
+  background-color: #f1f3f5;
+  color: #333;
+  border: 1px solid #ccc;
+}
+
+.csv-btn:hover {
+  background-color: #e2e6ea;
+}
+
+/* 메시지 생성 버튼 */
+.generate-btn {
+  background: linear-gradient(to right, #2d2a27, #3e454b);
+  color: white;
+  box-shadow: 0 4px 12px rgba(20, 30, 41, 0.4);
+}
+
+.generate-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(28, 39, 50, 0.55);
+}
+
+.generate-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 테이블 영역 */
+.segment-table-wrapper {
+  overflow-x: auto;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.segment-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.segment-table thead {
+  background-color: #f7f9fc;
+}
+
+.segment-table th,
+.segment-table td {
+  padding: 0.85rem 0.75rem;
+  border-bottom: 1px solid #e0e0e0;
+  vertical-align: top;
+}
+
+.segment-table th {
+  font-weight: 700;
+  text-align: left;
+  color: #333;
+  white-space: nowrap;
+}
+
+.segment-table tbody tr:hover {
+  background-color: #f4f8fc;
+}
+
+/* 강조 컬럼 */
+.segment-table .highlight {
+  font-weight: 700;
+  color: #0c090a;
+}
+
+/* 상태 메시지 */
+.segment-page-status {
+  margin: 4rem auto;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #742323;
+}
+
+.segment-page-status.error {
+  color: #d32f2f;
+}

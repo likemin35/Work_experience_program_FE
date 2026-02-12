@@ -1,350 +1,73 @@
-.chat-container {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1; /* Takes up the remaining space */
-    height: calc(100vh - 70px); /* Adjust based on header height */
-    background-color: #fff;
-    max-width: 900px; /* Limit the maximum width of the chat container */
-    margin: 0 auto; /* Center the chat container horizontally */
-    align-items: center; /* Center content horizontally within the container */
-}
-
-/* New: Centering for initial state */
-.chat-container.initial-state {
-    justify-content: flex-start; /* Align items to the top */
-    align-items: center; /* Center items horizontally */
-    width: 100%;
-}
-
-.chat-header {
-    padding: 1rem;
-    border-bottom: 1px solid #e0e0e0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #f7f7f7;
-}
-
-.chat-header h1 {
+body {
     margin: 0;
-    font-size: 1.2rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: #111827;
 }
 
-.manual-create-button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-    cursor: pointer;
-    text-decoration: none;
-    font-size: 0.9rem;
-}
 
-.manual-create-button:hover {
-    background-color: #0056b3;
-}
-
-.chat-window {
-    flex-grow: 1;
-    padding: 1rem;
-    overflow-y: auto;
-    background-color: #ffffff;
+.landing-container {
+    min-height: 100vh;
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 40px;
+    background-color: #fbfbfa; 
+
+.landing-content {
+    max-width: 900px;
     width: 100%;
 }
 
-/* Custom Scrollbar for chat-window */
-.chat-window::-webkit-scrollbar {
-  width: 0px; /* Hide scrollbar width */
-  background: transparent; /* Make background transparent */
+.version-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #6b7280;
 }
 
-.chat-window::-webkit-scrollbar-thumb {
-  background: transparent; /* Make thumb transparent */
+.main-title {
+    font-size: 56px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin: 20px 0 40px 0;
 }
 
-/* For Firefox */
-.chat-window {
-  scrollbar-width: none; /* Hide scrollbar for Firefox */
+.checklist {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 40px 0;
 }
 
-/* New styles for avatar and message rows */
-.message-row {
-    display: flex;
-    margin-bottom: 1rem;
-    align-items: flex-end; /* Align avatars and message bubbles at the bottom */
+.checklist li {
+    position: relative;
+    padding-left: 28px;
+    margin-bottom: 18px;
+    font-size: 16px;
+    color: #374151;
 }
 
-.message-row.user {
-    justify-content: flex-end; /* Push user's message and avatar to the right */
-}
-
-.message-row.assistant {
-    justify-content: flex-start; /* Push assistant's message and avatar to the left */
-}
-
-.avatar {
-    width: 36px; /* Avatar size */
-    height: 36px;
-    border-radius: 50%; /* Make it circular */
-    background-color: #e9ecef; /* Neutral background for text avatars */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 1.2rem; /* For initial/icon if no image */
-    color: #fff;
-    flex-shrink: 0; /* Prevent avatar from shrinking */
-    overflow: hidden; /* Hide parts of image outside circle */
+.checklist li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    top: 0;
     font-weight: bold;
+    color: #111827;
 }
 
-.message-row.user .avatar {
-    order: 2; /* Place user avatar after the message bubble */
-    margin-left: 0.5rem;
-    background-color: #007bff; /* Blue for user avatar background */
+.start-button {
+    background-color: #111827;
+    color: #ffffff;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
 }
 
-.message-row.assistant .avatar {
-    order: 0; /* Place assistant avatar before the message bubble */
-    margin-right: 0.5rem;
-    background-color: #6c757d; /* Grey for assistant avatar background */
-}
-
-.message-row.assistant .message {
-    order: 1; /* Place message after avatar */
-}
-
-.message {
-    margin-bottom: 0rem; /* Reset to 0 as margin is now on .message-row */
-    padding: 0.75rem 1rem;
-    border-radius: 18px;
-    max-width: calc(80% - 46px); /* Adjust max-width to account for avatar (36px + 10px margin) */
-    line-height: 1.5;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-}
-
-.message.user {
-    background-color: #007bff;
-    color: white;
-    /* align-self: flex-end; -- This is now handled by .message-row.user */
-    border-bottom-right-radius: 4px; /* Reset for better bubble shape with avatar */
-}
-
-.message.assistant {
-    background-color: #f0f0f0;
-    color: #333;
-    /* align-self: flex-start; -- This is now handled by .message-row.assistant */
-    border-bottom-left-radius: 4px; /* Reset for better bubble shape with avatar */
-}
-
-.message-row.assistant:nth-of-type(odd) .message.assistant {
-    background-color: #f0f0f0; /* Default assistant message color */
-}
-
-.message-row.assistant:nth-of-type(even) .message.assistant {
-    background-color: #e8e8e8; /* Slightly darker shade for even messages */
-}
-
-.message-timestamp {
-    font-size: 0.75rem;
-    color: #888;
-    margin-top: 5px;
-    display: block; /* Ensure it takes its own line */
-    text-align: right; /* Align to the right within the bubble */
+.start-button:hover {
     opacity: 0.8;
 }
-
-.message.assistant .message-timestamp {
-    text-align: left; /* Align assistant message timestamp to the left */
-}
-
-.message.user .message-timestamp {
-    color: white; /* Make user message timestamp white for better contrast */
-}
-
-
-.initial-prompt {
-    /* align-self: center; Removed */
-    text-align: center;
-    /* margin: auto; Removed */
-    color: #666;
-    font-size: 1.5rem;
-}
-
-/* Removed old .maix-welcome card styling */
-
-.maix-welcome-logo {
-    font-family: 'Nunito', sans-serif;
-    font-size: 7.8rem; /* Larger font size for MAIX */
-    margin-bottom: 0px;
-    font-weight: 900; /* Made font weight even bolder */
-    background: linear-gradient(to right, #4A90E2, #00C6FF); /* Gradient from GlobalHeader */
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-align: center;
-}
-
-.maix-tagline {
-    display: flex; /* Arrange h2 elements side-by-side */
-    gap: 10px; /* Space between h2 elements */
-    margin-bottom: 5px;
-    justify-content: center; /* Center the taglines */
-    flex-wrap: wrap; /* Allow wrapping on smaller screens */
-    margin-top: -30px; /* Reduce space between MAIX logo and tagline */
-}
-
-.maix-tagline h2 {
-    font-size: 1.6rem;
-    font-weight: normal;
-    color: #555;
-    line-height: 1.6;
-    margin: 0; /* Remove default margin */
-    text-align: center;
-}
-
-.chat-container.initial-state h4 {
-    font-size: 1.1rem;
-    font-weight: normal;
-    color: #777;
-    margin-top: 0px;
-    text-align: center;
-}
-
-
-.chat-input-form {
-    padding: 1rem;
-    border-top: none;
-    background-color: #ffffff;
-    width: 100%;
-}
-
-/* New: Styling for centered input form */
-.chat-input-form.centered-input-form {
-    margin-top: 20px; /* Space from welcome message */
-}
-
-.chat-input-wrapper {
-    position: relative; /* For positioning the send button */
-    display: flex; /* To allow textarea to flex-grow */
-    align-items: flex-end; /* Align items to the bottom */
-    border: 1px solid #ccc; /* Border around the wrapper */
-    border-radius: 20px; /* Rounded corners for the wrapper */
-    padding: 0.5rem; /* Padding inside the wrapper */
-    transition: all 0.2s ease-in-out; /* Smooth transition for focus effects */
-}
-
-.chat-input-wrapper:focus-within { /* Apply styles when any child is focused */
-    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25); /* Blue glow */
-    border-color: #007bff;
-}
-
-.chat-input {
-    flex-grow: 1;
-    padding: 0.5rem 2.5rem 0.5rem 0.5rem; /* Adjusted padding-right for the button */
-    border: none; /* Remove border from textarea itself */
-    border-radius: 0; /* Remove border-radius from textarea itself */
-    resize: none; /* Re-added to remove resize handle */
-    min-height: 40px; /* Minimum height for single line */
-    max-height: 150px; /* Maximum height to prevent excessive growth */
-    overflow-y: auto; /* Enable scroll if content exceeds max-height */
-    font-size: 1rem;
-    line-height: 1.5;
-    background-color: transparent; /* Ensure textarea background is transparent */
-}
-
-/* Custom Scrollbar for chat-input (Hidden) */
-.chat-input::-webkit-scrollbar {
-  width: 0px; /* Hide scrollbar width */
-  background: transparent; /* Make background transparent */
-}
-
-.chat-input::-webkit-scrollbar-thumb {
-  background: transparent; /* Make thumb transparent */
-}
-
-/* For Firefox */
-.chat-input {
-  scrollbar-width: none; /* Hide scrollbar for Firefox */
-}
-
-
-.chat-input:focus {
-    outline: none; /* Remove default focus outline */
-    box-shadow: none; /* Remove default focus box-shadow if any */
-}
-
-/* Typing dots animation */
-.typing-dots {
-    display: inline-flex; /* Use flex to align dots */
-    align-items: flex-end; /* Align dots at the bottom */
-    margin-left: 0.2rem;
-}
-
-.typing-dots span {
-    animation: bounce 1.4s infinite ease-in-out;
-    font-size: 1.2rem; /* Adjust dot size */
-    opacity: 0.6; /* Start with some transparency */
-}
-
-.typing-dots span:nth-child(2) {
-    animation-delay: 0.2s; /* Delay for second dot */
-}
-
-.typing-dots span:nth-child(3) {
-    animation-delay: 0.4s; /* Delay for third dot */
-}
-
-@keyframes bounce {
-    0%, 80%, 100% {
-        transform: translateY(0);
-        opacity: 0.6;
-    }
-    40% {
-        transform: translateY(-5px);
-        opacity: 1;
-    }
-}
-
-
-.chat-send-button {
-    position: absolute; /* Position relative to wrapper */
-    right: 15px; /* Adjust as needed */
-    bottom: 10px; /* Adjust as needed */
-    width: 36px;
-    height: 36px;
-    border: none;
-    background-color: transparent; /* Changed to transparent */
-    /* color: white; -- No longer needed for background, but keep for icon if it's text */
-    border-radius: 50%; /* Make it circular */
-    cursor: pointer;
-    font-size: 1rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 0; /* Remove default button padding */
-    box-shadow: none; /* Removed shadow */
-    transition: stroke 0.2s ease-in-out; /* Smooth transition for hover effect */
-}
-
-.chat-send-button svg {
-    width: 20px;
-    height: 20px;
-    stroke: #007bff; /* Base blue color for the icon */
-    transform: translate(1px, -1px) rotate(45deg); /* Adjust icon direction and position */
-}
-
-.chat-send-button:not(:disabled):hover svg {
-    stroke: #0056b3; /* Darker blue on hover */
-}
-
-.chat-send-button:disabled {
-    background-color: transparent; /* Ensure transparent when disabled */
-    cursor: not-allowed;
-}
-
-.chat-send-button:disabled svg {
-    stroke: #a0a0a0; /* Gray out icon when disabled */
 }

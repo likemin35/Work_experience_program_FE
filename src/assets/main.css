@@ -12,9 +12,9 @@
 }
 
 .main-content {
-  padding-top: var(--header-height); /* Space for the fixed header */
-  background-color: #ffffff; /* Changed from #f9f9f9 to white */
-  height: 100%;
+  padding-top: var(--header-height);
+  background-color: #fbfbfa; 
+  min-height: 100vh;
   box-sizing: border-box;
 }
 

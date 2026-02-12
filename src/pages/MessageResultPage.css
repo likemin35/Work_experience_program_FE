@@ -1,0 +1,104 @@
+.message-result-container {
+  padding: 24px 32px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.message-result-container h1 {
+  margin-bottom: 24px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* 상태 표시 */
+.message-page-status {
+  padding: 40px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.message-page-status.error {
+  color: #d32f2f;
+}
+
+/* 메시지 카드 */
+.message-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  background-color: #ffffff;
+}
+
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.message-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.message-index {
+  font-size: 12px;
+  color: #777;
+}
+
+/* 세그먼트 특징 */
+.message-features {
+  margin: 8px 0 14px 0;
+  font-size: 14px;
+  color: #555;
+}
+
+/* 메시지 본문 */
+.message-body {
+  padding: 14px;
+  border-radius: 6px;
+  background-color: #f8f9fa;
+  font-size: 15px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* 버튼 영역 */
+.message-actions {
+  margin-top: 14px;
+  text-align: right;
+}
+
+.message-actions button {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: none;
+  background-color: #2d2a27;
+  color: white;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.message-actions button:hover {
+  background-color: #3e454b;
+}
+
+.message-top-actions {
+  margin-bottom: 16px;
+}
+
+.segment-map-btn {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: none;
+  background-color: #16a34a;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.segment-map-btn:hover {
+  background-color: #15803d;
+}

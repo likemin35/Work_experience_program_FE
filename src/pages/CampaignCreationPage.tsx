@@ -1,304 +1,197 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../api";
 import "./CampaignCreationPage.css";
-
-// Type for a single custom column in the component's state
-type CustomColumn = {
-  key: string;
-  valueType: 'single' | 'multiple';
-  values: string[];
-};
+import { FileText, FileSpreadsheet } from "lucide-react";
 
 const CampaignCreationPage = () => {
-  const [purpose, setPurpose] = useState("");
-  const [coreBenefit, setCoreBenefit] = useState("");
-  const [sourceUrls, setSourceUrls] = useState<string[]>([""]);
-  // New state for the complex custom columns
-  const [customColumns, setCustomColumns] = useState<CustomColumn[]>([
-    { key: "", valueType: "single", values: [""] },
-  ]);
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [csvFile, setCsvFile] = useState<File | null>(null);
   const [status, setStatus] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const [isPdfDragging, setIsPdfDragging] = useState(false);
+  const [isCsvDragging, setIsCsvDragging] = useState(false);
+
   const navigate = useNavigate();
-  const location = useLocation();
-
-  useEffect(() => {
-    const campaignData = location.state?.campaignData;
-    if (campaignData) {
-      setPurpose(campaignData.campaignTitle || "");
-      setCoreBenefit(campaignData.coreBenefitText || "");
-      
-      // Ensure sourceUrls is an array with at least one empty string for the input
-      const urls = campaignData.sourceUrls && campaignData.sourceUrls.length > 0 ? campaignData.sourceUrls : [""];
-      setSourceUrls(urls);
-
-      // Transform customColumns from API object to component state array
-      if (campaignData.customColumns && Object.keys(campaignData.customColumns).length > 0) {
-        const transformedColumns: CustomColumn[] = Object.entries(campaignData.customColumns).map(([key, value]) => {
-          if (Array.isArray(value)) {
-            return { key, valueType: 'multiple', values: value.length > 0 ? value : [""] };
-          } else {
-            return { key, valueType: 'single', values: [String(value)] };
-          }
-        });
-        setCustomColumns(transformedColumns);
-      } else {
-        // If no custom columns, ensure there's one empty one for the UI
-        setCustomColumns([{ key: "", valueType: "single", values: [""] }]);
-      }
-    }
-  }, [location.state]);
-
-
-  // --- Handlers for Source URLs ---
-  const handleUrlChange = (index: number, value: string) => {
-    const newUrls = [...sourceUrls];
-    newUrls[index] = value;
-    setSourceUrls(newUrls);
-  };
-
-  const addUrlInput = () => {
-    setSourceUrls([...sourceUrls, ""]);
-  };
-
-  const removeUrlInput = (index: number) => {
-    if (sourceUrls.length > 1) {
-      const newUrls = sourceUrls.filter((_, i) => i !== index);
-      setSourceUrls(newUrls);
-    }
-  };
-
-  // --- Handlers for Custom Columns ---
-  const addColumn = () => {
-    setCustomColumns([...customColumns, { key: "", valueType: "single", values: [""] }]);
-  };
-
-  const removeColumn = (index: number) => {
-    if (customColumns.length > 1) {
-      const newColumns = customColumns.filter((_, i) => i !== index);
-      setCustomColumns(newColumns);
-    }
-  };
-
-  const handleColumnChange = (index: number, field: keyof CustomColumn, value: any) => {
-    const newColumns = [...customColumns];
-    const column = newColumns[index];
-    
-    if (field === 'valueType') {
-      column.valueType = value;
-      // When switching to single, keep only the first value
-      if (value === 'single') {
-        column.values = [column.values[0] || ''];
-      } else { // When switching to multiple, ensure there's at least one input
-        if (column.values.length === 0) {
-          column.values = [''];
-        }
-      }
-    } else {
-      (column as any)[field] = value;
-    }
-    setCustomColumns(newColumns);
-  };
-  
-  const handleColumnValueChange = (colIndex: number, valIndex: number, value: string) => {
-    const newColumns = [...customColumns];
-    newColumns[colIndex].values[valIndex] = value;
-    setCustomColumns(newColumns);
-  };
-
-  const addValueToColumn = (colIndex: number) => {
-    const newColumns = [...customColumns];
-    newColumns[colIndex].values.push("");
-    setCustomColumns(newColumns);
-  };
-
-  const removeValueFromColumn = (colIndex: number, valIndex: number) => {
-    const newColumns = [...customColumns];
-    if (newColumns[colIndex].values.length > 1) {
-      newColumns[colIndex].values = newColumns[colIndex].values.filter((_, i) => i !== valIndex);
-      setCustomColumns(newColumns);
-    }
-  };
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!pdfFile) {
+      setStatus("프로모션 PDF 파일을 업로드해주세요.");
+      return;
+    }
+
+    if (!csvFile) {
+      setStatus("고객 CSV 파일을 업로드해주세요.");
+      return;
+    }
+
     setIsLoading(true);
-    setStatus("AI Agent 구동을 요청했습니다. 잠시만 기다려주세요...");
-
-    // 1. Filter out empty URLs
-    const nonEmptyUrls = sourceUrls.filter(url => url.trim() !== "");
-    
-    // 2. Transform custom columns state into the required API object format
-    const formattedCustomColumns: { [key: string]: string | string[] } = {};
-    customColumns.forEach(col => {
-      if (col.key.trim() !== "") {
-        if (col.valueType === 'single') {
-          // Use the single value if it's not empty
-          if(col.values[0] && col.values[0].trim() !== "") {
-            formattedCustomColumns[col.key.trim()] = col.values[0].trim();
-          }
-        } else {
-          // Filter out empty strings from the multiple values array
-          const nonEmptyValues = col.values.map(v => v.trim()).filter(v => v !== "");
-          if (nonEmptyValues.length > 0) {
-            formattedCustomColumns[col.key.trim()] = nonEmptyValues;
-          }
-        }
-      }
-    });
-
-    const campaignData = {
-      marketerId: "tester",
-      purpose,
-      coreBenefitText: coreBenefit,
-      sourceUrls: nonEmptyUrls,
-      customColumns: formattedCustomColumns,
-    };
+    setStatus("캠페인 생성 및 고객 세그먼트 매핑을 진행 중입니다...");
 
     try {
-      console.log("Submitting campaign data:", campaignData);
-      const response = await axios.post("/api/campaigns", campaignData);
-      const newCampaignId = response.data.campaignId;
-      setStatus("캠페인 생성이 완료되었습니다. 상세 페이지로 이동합니다.");
-      navigate(`/campaign/${newCampaignId}`);
+      const campaignFormData = new FormData();
+      campaignFormData.append("file", pdfFile);
+
+      const campaignRes = await api.post(
+        "/api/campaigns",
+        campaignFormData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
+      const campaignId = campaignRes.data.campaignId;
+
+      const customerFormData = new FormData();
+      customerFormData.append("file", csvFile);
+
+      await api.post(
+        `/api/campaigns/${campaignId}/segments`,
+        customerFormData
+      );
+
+      navigate(`/campaign/${campaignId}/segments`);
     } catch (error) {
-      console.error("Failed to create campaign:", error);
-      setStatus("캠페인 생성에 실패했습니다. 다시 시도해 주세요.");
+      setStatus("처리 중 오류가 발생했습니다.");
       setIsLoading(false);
+    }
+  };
+
+  const handlePdfDrop = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    setIsPdfDragging(false);
+    if (e.dataTransfer.files?.[0]) {
+      setPdfFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleCsvDrop = (e: React.DragEvent<HTMLLabelElement>) => {
+    e.preventDefault();
+    setIsCsvDragging(false);
+    if (e.dataTransfer.files?.[0]) {
+      setCsvFile(e.dataTransfer.files[0]);
     }
   };
 
   return (
     <div className="campaign-creation-container">
-      <h1>새 프로모션 생성</h1>
-      <form onSubmit={handleSubmit} className="creation-form">
-        {/* --- Purpose and Core Benefit (unchanged) --- */}
-        <div className="form-group">
-          <label htmlFor="purpose">프로모션 제목</label>
-          <input type="text" id="purpose" value={purpose} onChange={(e) => setPurpose(e.target.value)} placeholder="예: 20대 신규 고객 확보" required />
-        </div>
+      <div className="creation-content">
+        <span className="page-label">NEW CAMPAIGN</span>
+        <h1 className="page-title">새 프로모션 생성</h1>
 
-        <hr className="section-divider" />
+        <form onSubmit={handleSubmit} className="creation-form">
 
-        <div className="form-group">
-          <label htmlFor="coreBenefit">프로모션 내용 (핵심 혜택)</label>
-          <textarea id="coreBenefit" value={coreBenefit} onChange={(e) => setCoreBenefit(e.target.value)} placeholder="고객에게 제공할 핵심 혜택을 상세히 설명해주세요." required />
-        </div>
+          <div className="upload-grid">
 
-        <hr className="section-divider" />
+            {/* PDF */}
+            <div className="upload-card">
+              <div className="upload-card-header">
+                <FileText size={22} color="#ef4444" />
+                <div>
+                  <h3>프로모션 PDF 업로드</h3>
+                  <p>파일을 선택하거나 드래그하여 업로드하세요</p>
+                </div>
+              </div>
 
-        {/* --- Source URLs (unchanged) --- */}
-        <div className="form-group">
-          <label>참조 URL / Image</label>
-          {sourceUrls.map((url, index) => (
-            <div key={index} className="url-input-group">
-              <input type="text" value={url} onChange={(e) => handleUrlChange(index, e.target.value)} placeholder="https://example.com/promotion_image.jpg" />
-              {sourceUrls.length > 1 && (
-                <button type="button" className="remove-url-btn" onClick={() => removeUrlInput(index)}>삭제</button>
-              )}
-            </div>
-          ))}
-          <button type="button" className="add-url-btn" onClick={addUrlInput}>URL 추가</button>
-        </div>
+              <label
+                className={`drop-zone ${isPdfDragging ? "dragging" : ""}`}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsPdfDragging(true);
+                }}
+                onDragLeave={() => setIsPdfDragging(false)}
+                onDrop={handlePdfDrop}
+              >
+                <input
+                  type="file"
+                  accept=".pdf"
+                  hidden
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) {
+                      setPdfFile(e.target.files[0]);
+                    }
+                  }}
+                />
 
-        <hr className="section-divider" />
+                <div className="drop-content">
+                  <p>Choose a file or drag & drop it here</p>
+                  <span className="browse-btn">Browse File</span>
+                </div>
+              </label>
 
-        {/* --- New Custom Columns UI --- */}
-        <div className="form-group">
-          <label>사용 가능한 고객 데이터 컬럼</label>
-          <div className="custom-columns-table">
-            {/* Header Row */}
-            <div className="custom-columns-header">
-              <div className="header-key">컬럼 이름 (Key)</div>
-              <div className="header-type">값 유형 (Type)</div>
-              <div className="header-remove">삭제</div>
-            </div>
-
-            {/* Data Rows */}
-            <div className="custom-columns-body">
-              {customColumns.map((col, colIndex) => (
-                <div key={colIndex} className="custom-column-entry">
-                  {/* Main Row for Key/Type/Remove */}
-                  <div className="custom-column-main-row">
-                    <div className="column-key-input">
-                       <input
-                        type="text"
-                        value={col.key}
-                        onChange={(e) => handleColumnChange(colIndex, 'key', e.target.value)}
-                        placeholder={col.valueType === 'single' ? "컬럼 이름 (예: 가입일)" : "컬럼 이름 (예: 고객등급)"}
-                      />
-                    </div>
-                    <div className="segmented-control">
-                      <button type="button" className={col.valueType === 'single' ? 'active' : ''} onClick={() => handleColumnChange(colIndex, 'valueType', 'single')}>
-                        서술형
-                      </button>
-                      <button type="button" className={col.valueType === 'multiple' ? 'active' : ''} onClick={() => handleColumnChange(colIndex, 'valueType', 'multiple')}>
-                        카테고리형
-                      </button>
-                    </div>
-                    <div className="remove-column-cell">
-                      <button
-                        type="button"
-                        className="remove-column-btn"
-                        onClick={() => removeColumn(colIndex)}
-                        style={{ visibility: customColumns.length > 1 ? 'visible' : 'hidden' }}
-                      >
-                        삭제
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Values Area */}
-                  <div className="custom-column-values-container">
-                    {col.valueType === 'single' ? (
-                      <div className="custom-column-value-row">
-                        <input
-                          type="text"
-                          value={col.values[0] || ''}
-                          onChange={(e) => handleColumnValueChange(colIndex, 0, e.target.value)}
-                          placeholder="설명 (예: YYYY-MM-DD 형식)"
-                          className="single-value-input"
-                        />
-                      </div>
-                    ) : (
-                      <>
-                        {col.values.map((val, valIndex) => (
-                          <div key={valIndex} className="custom-column-value-row">
-                            <input
-                              type="text"
-                              value={val}
-                              onChange={(e) => handleColumnValueChange(colIndex, valIndex, e.target.value)}
-                              placeholder={`값 ${valIndex + 1} (예: VIP)`}
-                            />
-                            {col.values.length > 1 && (
-                              <button type="button" className="remove-value-btn" onClick={() => removeValueFromColumn(colIndex, valIndex)}>−</button>
-                            )}
-                          </div>
-                        ))}
-                        <div className="add-value-row">
-                          <button type="button" className="add-value-btn" onClick={() => addValueToColumn(colIndex)}>+</button>
-                        </div>
-                      </>
-                    )}
+              {pdfFile && (
+                <div className="file-preview">
+                  <div className="file-badge-pdf">PDF</div>
+                  <div className="file-info">
+                    <span>{pdfFile.name}</span>
+                    <span className="file-status">업로드 준비 완료</span>
                   </div>
                 </div>
-              ))}
+              )}
             </div>
-             <button type="button" className="add-column-btn" onClick={addColumn}>
-              + 커스텀 컬럼 추가
-            </button>
-          </div>
-        </div>
 
-        <div className="submit-btn-container">
-          <button type="submit" className="submit-btn" disabled={isLoading}>
-            {isLoading ? "요청 처리 중..." : "AI Agent 메시지 초안 요청"}
+            {/* CSV */}
+            <div className="upload-card">
+              <div className="upload-card-header">
+                <FileSpreadsheet size={22} color="#16a34a" />
+                <div>
+                  <h3>고객 CSV 업로드</h3>
+                  <p>파일을 선택하거나 드래그하여 업로드하세요</p>
+                </div>
+              </div>
+
+              <label
+                className={`drop-zone ${isCsvDragging ? "dragging" : ""}`}
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setIsCsvDragging(true);
+                }}
+                onDragLeave={() => setIsCsvDragging(false)}
+                onDrop={handleCsvDrop}
+              >
+                <input
+                  type="file"
+                  accept=".csv"
+                  hidden
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) {
+                      setCsvFile(e.target.files[0]);
+                    }
+                  }}
+                />
+
+                <div className="drop-content">
+                  <p>Choose a file or drag & drop it here</p>
+                  <span className="browse-btn">Browse File</span>
+                </div>
+              </label>
+
+              {csvFile && (
+                <div className="file-preview">
+                  <div className="file-badge-csv">CSV</div>
+                  <div className="file-info">
+                    <span>{csvFile.name}</span>
+                    <span className="file-status">업로드 준비 완료</span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+          </div>
+
+          <button
+            type="submit"
+            className="primary-button"
+            disabled={isLoading}
+          >
+            {isLoading ? "처리 중..." : "고객 세그먼트 매핑 시작"}
           </button>
-        </div>
-      </form>
-      {status && <div className="status-message">{status}</div>}
+
+        </form>
+
+        {status && <div className="status-message">{status}</div>}
+      </div>
     </div>
   );
 };

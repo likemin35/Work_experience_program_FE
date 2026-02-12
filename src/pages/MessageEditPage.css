@@ -1,0 +1,101 @@
+.message-edit-container {
+  padding: 24px 32px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.message-edit-container h1 {
+  margin-bottom: 20px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* 상태 표시 */
+.message-edit-status {
+  padding: 40px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.message-edit-status.error {
+  color: #d32f2f;
+}
+
+/* 수정 영역 */
+.edit-section {
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 24px;
+  background-color: #ffffff;
+}
+
+.edit-section h3 {
+  margin: 0 0 6px 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.target-features {
+  margin-bottom: 14px;
+  font-size: 14px;
+  color: #666;
+}
+
+/* textarea */
+.edit-section textarea {
+  width: 100%;
+  min-height: 220px;
+  padding: 14px;
+  font-size: 15px;
+  line-height: 1.6;
+  border-radius: 6px;
+  border: 1px solid #cfcfcf;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.edit-section textarea:focus {
+  outline: none;
+  border-color: #1976d2;
+}
+
+/* 버튼 영역 */
+.edit-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.cancel-btn {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid #bdbdbd;
+  background-color: #ffffff;
+  color: #333;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.cancel-btn:hover {
+  background-color: #f2f2f2;
+}
+
+.save-btn {
+  padding: 8px 18px;
+  border-radius: 6px;
+  border: none;
+  background-color: #2d2a27;
+  color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.save-btn:hover {
+  background-color: #3e454b;
+}
+
+.save-btn:disabled {
+  background-color: #90caf9;
+  cursor: not-allowed;
+}
