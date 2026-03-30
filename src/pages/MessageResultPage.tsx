@@ -8,6 +8,9 @@ type MessageResult = {
   targetGroupIndex: number;
   targetName: string;
   targetFeatures: string;
+  strategyMode?: string;
+  strategyReason?: string;
+  strategyReferences?: string;
   messageText: string;
 };
 
@@ -94,6 +97,14 @@ const MessageResultPage = () => {
           </div>
 
           <p className="message-features">{msg.targetFeatures}</p>
+
+          {(msg.strategyMode || msg.strategyReason || msg.strategyReferences) && (
+            <div className="message-features">
+              <div><strong>Strategy mode:</strong> {msg.strategyMode || "-"}</div>
+              <div><strong>Reason:</strong> {msg.strategyReason || "-"}</div>
+              <div><strong>References:</strong> {msg.strategyReferences || "[]"}</div>
+            </div>
+          )}
 
           <div className="message-body">
             {msg.messageText}
