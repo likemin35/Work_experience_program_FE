@@ -9,7 +9,6 @@ const CampaignCreationPage = () => {
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [status, setStatus] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
   const [isPdfDragging, setIsPdfDragging] = useState(false);
   const [isCsvDragging, setIsCsvDragging] = useState(false);
 
@@ -29,31 +28,23 @@ const CampaignCreationPage = () => {
     }
 
     setIsLoading(true);
-    setStatus("캠페인 생성 및 고객 세그먼트 매핑을 진행 중입니다...");
+    setStatus("파일 업로드 중입니다...");
 
     try {
-      const campaignFormData = new FormData();
-      campaignFormData.append("file", pdfFile);
+      const formData = new FormData();
+      formData.append("promotionPdf", pdfFile);
+      formData.append("customerCsv", csvFile);
 
       const campaignRes = await api.post(
         "/api/campaigns",
-        campaignFormData,
+        formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
       const campaignId = campaignRes.data.campaignId;
-
-      const customerFormData = new FormData();
-      customerFormData.append("file", csvFile);
-
-      await api.post(
-        `/api/campaigns/${campaignId}/segments`,
-        customerFormData
-      );
-
       navigate(`/campaign/${campaignId}/segments`);
     } catch (error) {
-      setStatus("처리 중 오류가 발생했습니다.");
+      setStatus("업로드 처리 중 오류가 발생했습니다.");
       setIsLoading(false);
     }
   };
@@ -78,19 +69,16 @@ const CampaignCreationPage = () => {
     <div className="campaign-creation-container">
       <div className="creation-content">
         <span className="page-label">NEW CAMPAIGN</span>
-        <h1 className="page-title">새 프로모션 생성</h1>
+        <h1 className="page-title">프로모션 생성</h1>
 
         <form onSubmit={handleSubmit} className="creation-form">
-
           <div className="upload-grid">
-
-            {/* PDF */}
             <div className="upload-card">
               <div className="upload-card-header">
                 <FileText size={22} color="#ef4444" />
                 <div>
                   <h3>프로모션 PDF 업로드</h3>
-                  <p>파일을 선택하거나 드래그하여 업로드하세요</p>
+                  <p>파일을 선택하거나 드래그해서 업로드하세요</p>
                 </div>
               </div>
 
@@ -131,13 +119,12 @@ const CampaignCreationPage = () => {
               )}
             </div>
 
-            {/* CSV */}
             <div className="upload-card">
               <div className="upload-card-header">
                 <FileSpreadsheet size={22} color="#16a34a" />
                 <div>
                   <h3>고객 CSV 업로드</h3>
-                  <p>파일을 선택하거나 드래그하여 업로드하세요</p>
+                  <p>파일을 선택하거나 드래그해서 업로드하세요</p>
                 </div>
               </div>
 
@@ -177,7 +164,6 @@ const CampaignCreationPage = () => {
                 </div>
               )}
             </div>
-
           </div>
 
           <button
@@ -185,9 +171,8 @@ const CampaignCreationPage = () => {
             className="primary-button"
             disabled={isLoading}
           >
-            {isLoading ? "처리 중..." : "고객 세그먼트 매핑 시작"}
+            {isLoading ? "처리 중.." : "업로드 완료"}
           </button>
-
         </form>
 
         {status && <div className="status-message">{status}</div>}

@@ -9,16 +9,44 @@ type Campaign = {
   status: string;
 };
 
+const STATUS_LABELS: Record<string, string> = {
+  UPLOADED: "업로드 완료",
+  SEGMENTING: "분류 중",
+  SEGMENTED: "분류 완료",
+  MESSAGE_GENERATING: "메시지 생성 중",
+  MESSAGE_GENERATED: "메시지 생성 완료",
+  SEGMENT_FAILED: "분류 실패",
+  MESSAGE_FAILED: "메시지 생성 실패",
+};
+
 const CampaignListPage = () => {
   const navigate = useNavigate();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    api
-      .get("/api/campaigns")
-      .then((res) => setCampaigns(res.data))
-      .finally(() => setIsLoading(false));
+    let mounted = true;
+
+    const fetchCampaigns = async () => {
+      try {
+        const res = await api.get("/api/campaigns");
+        if (mounted) {
+          setCampaigns(res.data);
+        }
+      } finally {
+        if (mounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchCampaigns();
+    const intervalId = window.setInterval(fetchCampaigns, 4000);
+
+    return () => {
+      mounted = false;
+      window.clearInterval(intervalId);
+    };
   }, []);
 
   if (isLoading) {
@@ -38,30 +66,22 @@ const CampaignListPage = () => {
           </tr>
         </thead>
         <tbody>
-          {campaigns.map((c) => (
-            <tr key={c.campaignId}>
-              <td>{c.title}</td>
-              <td>{c.status}</td>
+          {campaigns.map((campaign) => (
+            <tr key={campaign.campaignId}>
+              <td>{campaign.title}</td>
+              <td>{STATUS_LABELS[campaign.status] || campaign.status}</td>
               <td>
-                {c.status === "SEGMENTED" && (
-                  <button
-                    onClick={() =>
-                      navigate(`/campaign/${c.campaignId}/segments`)
-                    }
-                  >
-                    세그먼트 보기
-                  </button>
-                )}
-
-                {c.status === "MESSAGE_GENERATED" && (
-                  <button
-                    onClick={() =>
-                      navigate(`/campaign/${c.campaignId}`)
-                    }
-                  >
-                    메시지 보기
-                  </button>
-                )}
+                <button
+                  onClick={() =>
+                    navigate(
+                      campaign.status === "MESSAGE_GENERATED"
+                        ? `/campaign/${campaign.campaignId}`
+                        : `/campaign/${campaign.campaignId}/segments`
+                    )
+                  }
+                >
+                  상세 보기
+                </button>
               </td>
             </tr>
           ))}
