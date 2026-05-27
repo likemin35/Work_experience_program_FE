@@ -19,6 +19,9 @@ const STATUS_LABELS: Record<string, string> = {
   MESSAGE_FAILED: "메시지 생성 실패",
 };
 
+const isViewableStatus = (status: string) =>
+  ["SEGMENTED", "MESSAGE_GENERATING", "MESSAGE_GENERATED", "MESSAGE_FAILED"].includes(status);
+
 const CampaignListPage = () => {
   const navigate = useNavigate();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -72,13 +75,18 @@ const CampaignListPage = () => {
               <td>{STATUS_LABELS[campaign.status] || campaign.status}</td>
               <td>
                 <button
-                  onClick={() =>
+                  disabled={!isViewableStatus(campaign.status)}
+                  onClick={() => {
+                    if (!isViewableStatus(campaign.status)) {
+                      return;
+                    }
+
                     navigate(
                       campaign.status === "MESSAGE_GENERATED"
                         ? `/campaign/${campaign.campaignId}`
                         : `/campaign/${campaign.campaignId}/segments`
-                    )
-                  }
+                    );
+                  }}
                 >
                   상세 보기
                 </button>
