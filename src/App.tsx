@@ -1,45 +1,78 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import GlobalHeader from './components/GlobalHeader';
-import Home from './pages/Home';
-import CampaignCreationPage from './pages/CampaignCreationPage'; // 추가
-import CampaignSegmentResultPage from './pages/CampaignSegmentResultPage';
-import MessageResultPage from './pages/MessageResultPage';
-import MessageEditPage from './pages/MessageEditPage';
-import CampaignListPage from './pages/CampaignListPage';
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { AuthProvider } from "./auth/AuthContext";
+import ProtectedRoute from "./auth/ProtectedRoute";
+import GlobalHeader from "./components/GlobalHeader";
+import AuthCallbackPage from "./pages/AuthCallbackPage";
+import CampaignCreationPage from "./pages/CampaignCreationPage";
+import CampaignListPage from "./pages/CampaignListPage";
+import CampaignSegmentResultPage from "./pages/CampaignSegmentResultPage";
+import Home from "./pages/Home";
+import LoginPage from "./pages/LoginPage";
+import MessageEditPage from "./pages/MessageEditPage";
+import MessageResultPage from "./pages/MessageResultPage";
 
 function App() {
   return (
-    <Router>
-      <GlobalHeader />
-      <main className="main-content">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/promotion/create" element={<CampaignCreationPage />} />
-
-          <Route
-            path="/campaign/:campaignId/segments"
-            element={<CampaignSegmentResultPage />}
-          />
-
-          <Route
-            path="/campaign/:campaignId"
-            element={<MessageResultPage />}
-          />
-
-          <Route
-            path="/campaigns"
-            element={<CampaignListPage />}
-          />
-
-          <Route
-            path="/campaign/:campaignId/messages/:resultId/edit"
-            element={<MessageEditPage />}
-          />
-        </Routes>
-      </main>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <GlobalHeader />
+        <main className="main-content">
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/auth/callback" element={<AuthCallbackPage />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <Home />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/promotion/create"
+              element={
+                <ProtectedRoute>
+                  <CampaignCreationPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/campaign/:campaignId/segments"
+              element={
+                <ProtectedRoute>
+                  <CampaignSegmentResultPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/campaign/:campaignId"
+              element={
+                <ProtectedRoute>
+                  <MessageResultPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/campaigns"
+              element={
+                <ProtectedRoute>
+                  <CampaignListPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/campaign/:campaignId/messages/:resultId/edit"
+              element={
+                <ProtectedRoute>
+                  <MessageEditPage />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </main>
+      </Router>
+    </AuthProvider>
   );
 }
-
 
 export default App;

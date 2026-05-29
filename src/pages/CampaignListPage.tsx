@@ -20,7 +20,14 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const isViewableStatus = (status: string) =>
-  ["SEGMENTED", "MESSAGE_GENERATING", "MESSAGE_GENERATED", "MESSAGE_FAILED"].includes(status);
+  [
+    "UPLOADED",
+    "SEGMENTED",
+    "MESSAGE_GENERATING",
+    "MESSAGE_GENERATED",
+    "SEGMENT_FAILED",
+    "MESSAGE_FAILED",
+  ].includes(status);
 
 const CampaignListPage = () => {
   const navigate = useNavigate();
@@ -51,6 +58,22 @@ const CampaignListPage = () => {
       window.clearInterval(intervalId);
     };
   }, []);
+
+  const handleDeleteCampaign = async (campaignId: string) => {
+    const confirmed = window.confirm("이 프로모션을 삭제할까요?");
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      await api.delete(`/api/campaigns/${campaignId}`);
+      setCampaigns((prev) =>
+        prev.filter((campaign) => campaign.campaignId !== campaignId)
+      );
+    } catch (error) {
+      alert("프로모션 삭제에 실패했습니다.");
+    }
+  };
 
   if (isLoading) {
     return <div className="campaign-list-status">로딩 중...</div>;
@@ -89,6 +112,11 @@ const CampaignListPage = () => {
                   }}
                 >
                   상세 보기
+                </button>
+                <button
+                  onClick={() => handleDeleteCampaign(campaign.campaignId)}
+                >
+                  삭제
                 </button>
               </td>
             </tr>
